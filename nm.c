@@ -1,34 +1,92 @@
-#include <stdio.h>
-#include <sys/mman.h>
-#include <mach-o/loader.h>
-#include <mach-o/nlist.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <stdlib.h>
+#include "nm.h"
 
-void print_output(int nsyms, int symoff, int stroff, char *ptr)
+void disp_sym_lst(t_sym *lst)
+{
+	while (lst)
+	{
+		if (lst->value)
+			printf("%016llx", lst->value);
+		else
+			printf("                ");
+		printf(" %c", lst->type);
+		printf(" %s\n", lst->name);
+		lst = lst->next;
+	}
+}
+
+void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
+{
+	uint8_t	sorted;
+	t_sym	*sym;
+	t_sym	tmp;
+   
+	sorted = 1;
+	while (sorted)
+	{
+		sorted = 0;
+		sym	= *lst;
+		while (sym && sym->next)
+		{
+			if (strcmp(sym->name, sym->next->name) > 0)
+			{
+				tmp = *sym;
+				sym->value = sym->next->value;
+				sym->type = sym->next->type;
+				sym->name = sym->next->name;
+				sym->next->value = tmp.value;
+				sym->next->type = tmp.type;
+				sym->next->name = tmp.name;
+				sorted = 1;
+			}
+			sym = sym->next;
+		}
+	}
+}
+
+t_sym *get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
 {
 	int				i;
 	char			*stringtable;
 	struct nlist_64	*el;
+	t_sym			*sym;
+	t_sym			*sym_lst;
 
 	el = (void *)ptr + symoff;
 	stringtable = (void *)ptr + stroff;
-
+	sym = NULL;
+	sym_lst = NULL;
 	while (i < nsyms)
 	{
-		if ((el[i].n_type & N_TYPE) == N_UNDF)
-			printf("U");
-		else if ((el[i].n_type & N_TYPE) == N_SECT)
+		if (sym == NULL)
 		{
-			printf("%016llx ", el[i].n_value);
-			printf("T");
+			sym = (t_sym *)malloc(sizeof(t_sym));
+			sym_lst = sym;
 		}
 		else
-			printf("%d  ", el[i].n_type);
-		printf(" %s\n", stringtable + el[i].n_un.n_strx);
+		{
+			sym->next = (t_sym *)malloc(sizeof(t_sym));
+			sym = sym->next;
+		}
+		*sym = (t_sym){0, 0, stringtable + el[i].n_un.n_strx, NULL};
+		if ((el[i].n_type & N_TYPE) == N_UNDF)
+			sym->type = 'U';
+		else if ((el[i].n_type & N_TYPE) == N_ABS)
+			sym->type = 'A';
+		else if ((el[i].n_type & N_TYPE) == N_SECT)
+		{
+			sym->value = el[i].n_value;
+			sym->type = 'T';
+			printf("N_SECT : %d\n", el[i].n_sect);
+		}
+		else if ((el[i].n_type & N_TYPE) == N_PBUD)
+			sym->type = 'U';
+		//else if ((el[i].n_type & N_TYPE) == N_INDR)
+		//	sym->type = '??????????';
+		else
+			sym->type = '?';
 		i++;
 	}
+	return (sym_lst);
 }
 
 //struct mach_header_64 {
@@ -49,19 +107,32 @@ void handle_64(char *ptr)
 	struct mach_header_64	*header;
 	struct load_command 	*lc;
 	struct symtab_command	*sym;
+	t_sym					*sym_lst;
 
 	header = (struct mach_header_64 *)ptr;
 	ncmds = header->ncmds;
 	lc = (void *)ptr + sizeof(*header);
-	for (i = 0; i < ncmds; ++i)
+	i = 0;
+	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SYMTAB)	
 		{
 			sym = (struct symtab_command *)lc;
-			print_output(sym->nsyms, sym->symoff, sym->stroff, ptr);
+			sym_lst = get_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr);
+			sort_sym_lst(&sym_lst);
+			disp_sym_lst(sym_lst);
+			break;
+		}
+		else if (lc->cmd == LC_SYMTAB)	
+		{
+			sym = (struct dysymtab_command *)lc;
+			sym_lst = get_sym_lst(sym->nsyms, sym->symoff, sym->stroff, ptr);
+			sort_sym_lst(&sym_lst);
+			disp_sym_lst(sym_lst);
 			break;
 		}
 		lc = (void *)lc + lc->cmdsize;
+		i++;
 	}
 }
 
