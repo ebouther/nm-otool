@@ -43,30 +43,31 @@ void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
 	}
 }
 
-t_sym *get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
+t_sym **get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
 {
 	int				i;
 	char			*stringtable;
 	struct nlist_64	*el;
 	t_sym			*sym;
-	t_sym			*sym_lst;
+	t_sym			**sym_lst;
 
 	el = (void *)ptr + symoff;
 	stringtable = (void *)ptr + stroff;
 	sym = NULL;
-	sym_lst = NULL;
+	sym_lst = (t_sym **)malloc(sizeof(t_sym *));
 	while (i < nsyms)
 	{
 		if (sym == NULL)
 		{
 			sym = (t_sym *)malloc(sizeof(t_sym));
-			sym_lst = sym;
+			*sym_lst = sym;
 		}
 		else
 		{
 			sym->next = (t_sym *)malloc(sizeof(t_sym));
 			sym = sym->next;
 		}
+
 		*sym = (t_sym){0, 0, stringtable + el[i].n_un.n_strx, NULL};
 		if ((el[i].n_type & N_TYPE) == N_UNDF)
 			sym->type = 'U';
@@ -76,7 +77,6 @@ t_sym *get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
 		{
 			sym->value = el[i].n_value;
 			sym->type = 'T';
-			printf("N_SECT : %d\n", el[i].n_sect);
 		}
 		else if ((el[i].n_type & N_TYPE) == N_PBUD)
 			sym->type = 'U';
@@ -84,6 +84,7 @@ t_sym *get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
 		//	sym->type = '??????????';
 		else
 			sym->type = '?';
+
 		i++;
 	}
 	return (sym_lst);
@@ -107,29 +108,41 @@ void handle_64(char *ptr)
 	struct mach_header_64	*header;
 	struct load_command 	*lc;
 	struct symtab_command	*sym;
-	t_sym					*sym_lst;
+	t_sym					**sym_lst;
+	struct segment_command_64       *seg;
 
 	header = (struct mach_header_64 *)ptr;
 	ncmds = header->ncmds;
 	lc = (void *)ptr + sizeof(*header);
 	i = 0;
+	sym_lst = NULL;
 	while (i < ncmds)
 	{
-		if (lc->cmd == LC_SYMTAB)	
+		if (lc->cmd == LC_SEGMENT_64)
 		{
-			sym = (struct symtab_command *)lc;
-			sym_lst = get_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr);
-			sort_sym_lst(&sym_lst);
-			disp_sym_lst(sym_lst);
-			break;
+			struct section_64       *sect;
+			int n = 0;
+
+			seg = (struct segment_command_64 *)lc;
+			printf("SEGNAME : %s\n", seg->segname);
+			sect = (struct section_64 *)(seg + sizeof(*seg));
+			while (n < seg->nsects)
+			{
+				  printf("SECTION\n");
+
+				  printf("SEGNAME2 : %s\n", sect[i].segname);
+				  printf("SECTNAME : %s\n", sect[i].sectname);
+				  printf("SECT ADDR : %#llx\n", sect[i].addr);
+				  n++;
+			}
 		}
 		else if (lc->cmd == LC_SYMTAB)	
 		{
-			sym = (struct dysymtab_command *)lc;
-			sym_lst = get_sym_lst(sym->nsyms, sym->symoff, sym->stroff, ptr);
-			sort_sym_lst(&sym_lst);
-			disp_sym_lst(sym_lst);
-			break;
+			sym = (struct symtab_command *)lc;
+			sym_lst = get_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr);
+			printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
+			sort_sym_lst(sym_lst);
+			disp_sym_lst(*sym_lst);
 		}
 		lc = (void *)lc + lc->cmdsize;
 		i++;
@@ -150,6 +163,7 @@ int main(int argc, char **argv)
 	char		*ptr;
 	struct stat buf;
 
+	fflush(stdout);
 	if (argc != 2)
 		return (EXIT_FAILURE);
 	if ((fd = open(argv[1], O_RDONLY)) < 0)
