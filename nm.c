@@ -20,10 +20,12 @@ void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
 	t_sym	*sym;
 	t_sym	tmp;
    
-	sorted = 1;
-	while (sorted)
+	sorted = 0;
+	if (!lst)
+		return;
+	while (!sorted)
 	{
-		sorted = 0;
+		sorted = 1;
 		sym	= *lst;
 		while (sym && sym->next)
 		{
@@ -36,25 +38,31 @@ void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
 				sym->next->value = tmp.value;
 				sym->next->type = tmp.type;
 				sym->next->name = tmp.name;
-				sorted = 1;
+				sorted = 0;
 			}
 			sym = sym->next;
 		}
 	}
 }
 
-t_sym **get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
+void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_lst)
 {
 	int				i;
 	char			*stringtable;
 	struct nlist_64	*el;
 	t_sym			*sym;
-	t_sym			**sym_lst;
+	t_sym			*last_node;
 
 	el = (void *)ptr + symoff;
 	stringtable = (void *)ptr + stroff;
-	sym = NULL;
-	sym_lst = (t_sym **)malloc(sizeof(t_sym *));
+	sym = *sym_lst;
+	last_node = NULL;
+	while (sym)
+	{
+		last_node = sym;
+		sym = sym->next;
+	}
+	sym = last_node;
 	while (i < nsyms)
 	{
 		if (sym == NULL)
@@ -69,6 +77,16 @@ t_sym **get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
 		}
 
 		*sym = (t_sym){0, 0, stringtable + el[i].n_un.n_strx, NULL};
+
+		if ((el[i].n_type & N_STAB))
+			printf("N_STAB\n");
+
+		if ((el[i].n_type & N_PEXT))
+			printf("N_PEXT\n");
+
+		if ((el[i].n_type & N_EXT))
+			printf("N_EXT\n");
+
 		if ((el[i].n_type & N_TYPE) == N_UNDF)
 			sym->type = 'U';
 		else if ((el[i].n_type & N_TYPE) == N_ABS)
@@ -87,7 +105,6 @@ t_sym **get_symtab_lst(int nsyms, int symoff, int stroff, char *ptr)
 
 		i++;
 	}
-	return (sym_lst);
 }
 
 //struct mach_header_64 {
@@ -108,7 +125,7 @@ void handle_64(char *ptr)
 	struct mach_header_64	*header;
 	struct load_command 	*lc;
 	struct symtab_command	*sym;
-	t_sym					**sym_lst;
+	t_sym					*sym_lst;
 	struct segment_command_64       *seg;
 
 	header = (struct mach_header_64 *)ptr;
@@ -139,14 +156,14 @@ void handle_64(char *ptr)
 		else if (lc->cmd == LC_SYMTAB)	
 		{
 			sym = (struct symtab_command *)lc;
-			sym_lst = get_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr);
+			add_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr, &sym_lst);
 			printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
-			sort_sym_lst(sym_lst);
-			disp_sym_lst(*sym_lst);
 		}
 		lc = (void *)lc + lc->cmdsize;
 		i++;
 	}
+	sort_sym_lst(&sym_lst);
+	disp_sym_lst(sym_lst);
 }
 
 void nm(char *ptr)
