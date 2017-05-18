@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/15 15:22:44 by ebouther          #+#    #+#             */
-/*   Updated: 2017/05/15 17:37:10 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/05/18 19:24:44 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,15 @@ typedef struct 		s_sym
 {
 	uint64_t		value;
 	char			type;
+	uint8_t			n_sect;
 	char			*name;
 	struct s_sym	*next;
 }					t_sym;
+
+typedef struct 		s_sect
+{
+	char			section;
+	struct s_sect	*next;
+}					t_sect;
 
 #endif
