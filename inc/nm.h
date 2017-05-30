@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/15 15:22:44 by ebouther          #+#    #+#             */
-/*   Updated: 2017/05/18 19:24:44 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/05/30 13:49:20 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,11 @@
 # include <mach-o/nlist.h>
 # include <fcntl.h>
 # include <sys/stat.h>
+# include <unistd.h>
 
 #                          include <stdlib.h> // remove norme
 #                          include <string.h>
+# include "libft.h"
 
 typedef struct 		s_sym
 {

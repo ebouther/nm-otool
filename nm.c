@@ -9,8 +9,8 @@ void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 	while (lst)
 	{
 			sect_lst = begin;
-			if (sect_lst
-				&& lst->type == 'T'
+			if (lst->n_sect && sect_lst
+				&& (lst->type == 'T' || lst->type == 't')
 				&& lst->n_sect != NO_SECT)
 			{
 				i = 1;
@@ -22,15 +22,19 @@ void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 					i++;
 				}
 				if (i == lst->n_sect)
-					lst->type = sect_lst->section;
+				{
+					lst->type = sect_lst->section +
+						((lst->type == 't') ? 32 : 0);
+				}
 			}
 			if (lst->value)
-				printf("%016llx", lst->value);
+				ft_printf("%016llx", lst->value);
 			else
-				printf("                ");
-			printf(" %c", lst->type);
-			printf(" %s\n", lst->name);
-			//printf(" N_SECT : %d\n", lst->n_sect);
+				ft_printf("                ");
+			ft_printf(" %c", lst->type);
+			//ft_printf(" %d", lst->n_sect); // DBG
+			ft_printf(" %s\n", lst->name);
+			//ft_printf(" N_SECT : %d\n", lst->n_sect);
 		
 		lst = lst->next;
 	}
@@ -86,10 +90,11 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 		sect = sect->next;
 	}
 	sect = last_node;
-	//printf("SEGNAME : %s\n", seg->segname);
+	//ft_printf("SEGNAME : %s\n", seg->segname);
+	ft_printf("SECTNAME : %s", section[n].sectname);
 	while (n < seg->nsects)
 	{
-		//printf("SECTION (%d) \n", n);
+		//ft_printf("SECTION (%d) \n", n);
 		if (sect == NULL)
 		{
 			sect = (t_sect *)malloc(sizeof(t_sect));
@@ -101,7 +106,7 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 			sect = sect->next;
 		}
 
-		*sect = (t_sect){' ', NULL};
+		*sect = (t_sect){'S', NULL};
 
 		if (strcmp(section[n].sectname, SECT_TEXT) == 0 &&
 			   strcmp(section[n].segname, SEG_TEXT) == 0)
@@ -115,12 +120,7 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 		else if (strcmp(section[n].sectname, SECT_COMMON) &&
 			strcmp(section[n].segname, SEG_DATA) == 0)
 			sect->section = 'C';
-		  //printf("SEGNAME2 : %s\n", (section + n)->segname);
-		  //printf("SECTNAME : %s\n", (section + n)->sectname);
-		  //printf("SECT ADDR : %#llx\n", (section + n)->addr);
-		  //printf("SECT SIZE : %llu\n", (section + n)->size);
-
-		  n++;
+		n++;
 	}
 
 }
@@ -145,9 +145,8 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 	sym = last_node;
 	while (i < nsyms)
 	{
-		if ((el[i].n_type & N_TYPE) == N_INDR)
-			printf("!!!!!!! INDR !!!!!!!!!\n");
-		if (strlen(stringtable + el[i].n_un.n_strx) > 0)
+		if (ft_strlen(stringtable + el[i].n_un.n_strx) > 0
+			&& !(el[i].n_type & N_STAB))
 		{
 			if (sym == NULL)
 			{
@@ -160,15 +159,11 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 				sym = sym->next;
 			}
 
+			//ft_printf("SYM: %s\n", stringtable + el[i].n_un.n_strx);
 			*sym = (t_sym){0, 0, 0, stringtable + el[i].n_un.n_strx, NULL};
-			//if ((el[i].n_type & N_STAB))
-			//	printf("N_STAB\n");
 
 			//if ((el[i].n_type & N_PEXT))
-			//	printf("N_PEXT\n");
-
-			//if ((el[i].n_type & N_EXT))
-			//	printf("N_EXT\n");
+			//	ft_printf("N_PEXT\n");
 
 			if ((el[i].n_type & N_TYPE) == N_UNDF)
 				sym->type = 'U';
@@ -182,23 +177,20 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 			}
 			else if ((el[i].n_type & N_TYPE) == N_PBUD)
 				sym->type = 'U';
+			else if (el[i].n_type & N_INDR)
+				sym->type = 'I';
 			else
 				sym->type = '?';
+			if (!(el[i].n_type & N_EXT)
+					&& sym->type >= 'A'
+					&& sym->type <= 'Z')
+				sym->type += 32;
+				
 		}
 		i++;
 	}
 }
 
-//struct mach_header_64 {
-//        uint32_t        magic;          /* mach magic number identifier */
-//        cpu_type_t      cputype;        /* cpu specifier */
-//        cpu_subtype_t   cpusubtype;     /* machine specifier */
-//        uint32_t        filetype;       /* type of file */
-//        uint32_t        ncmds;          /* number of load commands */
-//        uint32_t        sizeofcmds;     /* the size of all the load commands */
-//        uint32_t        flags;          /* flags */
-//        uint32_t        reserved;       /* reserved */
-//};
 
 void handle_64(char *ptr)
 {
@@ -221,11 +213,11 @@ void handle_64(char *ptr)
 	{
 		if (lc->cmd == LC_SEGMENT_64)
 			add_sect_lst((struct segment_command_64 *)lc, &sect_lst);
-		else if (lc->cmd == LC_SYMTAB)	
+		else if (lc->cmd == LC_SYMTAB)
 		{
 			sym = (struct symtab_command *)lc;
 			add_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr, &sym_lst);
-			printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
+			//ft_printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
 		}
 		lc = (void *)lc + lc->cmdsize;
 		i++;
@@ -246,21 +238,29 @@ int main(int argc, char **argv)
 {
 	int 		fd;
 	char		*ptr;
-	struct stat buf;
+	struct stat	buf;
+	int			i;
 
+	i = 1;
+	while (i < argc)
+	{
+		if (argc > 2)
+			ft_printf("\n%s:\n", argv[i]);
+		if ((fd = open(argv[i], O_RDONLY)) < 0)
+			return (EXIT_FAILURE);
+		if (fstat(fd, &buf) < 0)
+			return (EXIT_FAILURE);
+		if ((ptr = mmap(0, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+			return (EXIT_FAILURE);
+
+		nm(ptr);
+
+		if (munmap(ptr, buf.st_size) < 0)
+			return (EXIT_FAILURE);
+		if (close(fd) == -1)
+			return (EXIT_FAILURE);
+		i++;
+	}
 	fflush(stdout);
-	if (argc != 2)
-		return (EXIT_FAILURE);
-	if ((fd = open(argv[1], O_RDONLY)) < 0)
-		return (EXIT_FAILURE);
-	if (fstat(fd, &buf) < 0)
-		return (EXIT_FAILURE);
-	if ((ptr = mmap(0, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-		return (EXIT_FAILURE);
-
-	nm(ptr);
-
-	if (munmap(ptr, buf.st_size) < 0)
-		return (EXIT_FAILURE);
 	return (0);
 }
