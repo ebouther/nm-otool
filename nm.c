@@ -28,7 +28,7 @@ void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 						((lst->type == 't') ? 32 : 0);
 				}
 			}
-			if (lst->value)
+			if (lst->type != 'U')
 				ft_printf("%016llx", lst->value);
 			else
 				ft_printf("                ");
@@ -120,9 +120,9 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 		else if (strcmp(section[n].sectname, SECT_BSS) == 0) //&&
 			//strcmp(section[n].segname, SEG_DATA) == 0)
 			sect->section = 'B';
-		else if (strcmp(section[n].sectname, SECT_COMMON) == 0) //&&
-			//strcmp(section[n].segname, SEG_DATA) == 0)
-			sect->section = 'C';
+		//else if (strcmp(section[n].sectname, SECT_COMMON) == 0) //&&
+		//	//strcmp(section[n].segname, SEG_DATA) == 0)
+		//	sect->section = 'C';
 		n++;
 	}
 
@@ -170,7 +170,9 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 		    //ft_printf("SYMBOL [%x] [%s] [%d]\n", (unsigned int)sym,stringtable + el[i].n_un.n_strx, el[i].n_sect);
 
 			if ((el[i].n_type & N_TYPE) == N_UNDF)
-				sym->type = 'U';
+			{
+				sym->type = (el[i].n_sect == NO_SECT) ? 'U' : 'C';
+			}
 			else if ((el[i].n_type & N_TYPE) == N_ABS)
 				sym->type = 'A';
 			else if ((el[i].n_type & N_TYPE) == N_SECT)
