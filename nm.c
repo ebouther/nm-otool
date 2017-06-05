@@ -8,6 +8,7 @@ void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 	begin = sect_lst;
 	while (lst)
 	{
+		    //ft_printf("SYMBOL 2 [%x] [%s] [%d]\n", (unsigned int)lst, lst->name, lst->n_sect);
 			sect_lst = begin;
 			if (lst->n_sect && sect_lst
 				&& (lst->type == 'T' || lst->type == 't')
@@ -60,9 +61,11 @@ void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
 				tmp = *sym;
 				sym->value = sym->next->value;
 				sym->type = sym->next->type;
+				sym->n_sect = sym->next->n_sect;
 				sym->name = sym->next->name;
 				sym->next->value = tmp.value;
 				sym->next->type = tmp.type;
+				sym->next->n_sect = tmp.n_sect;
 				sym->next->name = tmp.name;
 				sorted = 0;
 			}
@@ -91,7 +94,7 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 	}
 	sect = last_node;
 	//ft_printf("SEGNAME : %s\n", seg->segname);
-	ft_printf("SECTNAME : %s", section[n].sectname);
+	//ft_printf("SECTNAME : %s", section[n].sectname);
 	while (n < seg->nsects)
 	{
 		//ft_printf("SECTION (%d) \n", n);
@@ -108,17 +111,17 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 
 		*sect = (t_sect){'S', NULL};
 
-		if (strcmp(section[n].sectname, SECT_TEXT) == 0 &&
-			   strcmp(section[n].segname, SEG_TEXT) == 0)
+		if (strcmp(section[n].sectname, SECT_TEXT) == 0) //&&
+			   //strcmp(section[n].segname, SEG_TEXT) == 0)
 			sect->section = 'T';
-		else if (strcmp(section[n].sectname, SECT_DATA) == 0 &&
-			strcmp(section[n].segname, SEG_DATA) == 0)
+		else if (strcmp(section[n].sectname, SECT_DATA) == 0) //&&
+			//strcmp(section[n].segname, SEG_DATA) == 0)
 			sect->section = 'D';
-		else if (strcmp(section[n].sectname, SECT_BSS) == 0 &&
-			strcmp(section[n].segname, SEG_DATA) == 0)
+		else if (strcmp(section[n].sectname, SECT_BSS) == 0) //&&
+			//strcmp(section[n].segname, SEG_DATA) == 0)
 			sect->section = 'B';
-		else if (strcmp(section[n].sectname, SECT_COMMON) &&
-			strcmp(section[n].segname, SEG_DATA) == 0)
+		else if (strcmp(section[n].sectname, SECT_COMMON) == 0) //&&
+			//strcmp(section[n].segname, SEG_DATA) == 0)
 			sect->section = 'C';
 		n++;
 	}
@@ -160,10 +163,11 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 			}
 
 			//ft_printf("SYM: %s\n", stringtable + el[i].n_un.n_strx);
-			*sym = (t_sym){0, 0, 0, stringtable + el[i].n_un.n_strx, NULL};
+			*sym = (t_sym){0, 0, el[i].n_sect, stringtable + el[i].n_un.n_strx, NULL};
 
 			//if ((el[i].n_type & N_PEXT))
 			//	ft_printf("N_PEXT\n");
+		    //ft_printf("SYMBOL [%x] [%s] [%d]\n", (unsigned int)sym,stringtable + el[i].n_un.n_strx, el[i].n_sect);
 
 			if ((el[i].n_type & N_TYPE) == N_UNDF)
 				sym->type = 'U';
@@ -173,7 +177,7 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 			{
 				sym->value = el[i].n_value;
 				sym->type = 'T';
-				sym->n_sect = el[i].n_sect;
+				//sym->n_sect = el[i].n_sect;
 			}
 			else if ((el[i].n_type & N_TYPE) == N_PBUD)
 				sym->type = 'U';
