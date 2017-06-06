@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/15 15:22:44 by ebouther          #+#    #+#             */
-/*   Updated: 2017/05/30 13:49:20 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/06/06 01:59:05 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <sys/mman.h>
 # include <mach-o/loader.h>
 # include <mach-o/nlist.h>
+# include <mach-o/fat.h>
 # include <fcntl.h>
 # include <sys/stat.h>
 # include <unistd.h>
@@ -39,5 +40,7 @@ typedef struct 		s_sect
 	char			section;
 	struct s_sect	*next;
 }					t_sect;
+
+void nm(char *ptr);
 
 #endif

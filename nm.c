@@ -232,12 +232,33 @@ void handle_64(char *ptr)
 	disp_sym_lst(sym_lst, sect_lst);
 }
 
+void handle_fat(char *ptr)
+{
+	int							nfat_arch;
+	int							i;
+	struct fat_header			*header;
+	struct fat_arch				*arch;
+
+	header = (struct fat_header *)ptr;
+	nfat_arch = header->nfat_arch;
+	arch = (void *)ptr + sizeof(*header);
+	i = 0;
+	while (i < nfat_arch)
+	{
+		nm((char *)((void *)ptr + arch->offset));
+		arch = (void *)arch + arch->size;
+		i++;
+	}
+}
+
 void nm(char *ptr)
 {
 	int magic_number;
 	magic_number = *(int *)ptr;
-	if (magic_number == MH_MAGIC_64)
+	if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
 		handle_64(ptr);
+	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
+		handle_fat(ptr);
 }
 
 int main(int argc, char **argv)
