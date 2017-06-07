@@ -1,4 +1,5 @@
 #include "nm.h"
+#include "swap.h"
 
 void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 {
@@ -198,7 +199,7 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 }
 
 
-void handle_64(char *ptr)
+void handle_64(char *ptr, uint8_t l_endian)
 {
 	int							ncmds;
 	int							i;
@@ -232,20 +233,20 @@ void handle_64(char *ptr)
 	disp_sym_lst(sym_lst, sect_lst);
 }
 
-void handle_fat(char *ptr)
+void handle_fat(char *ptr, uint8_t l_endian)
 {
-	int							nfat_arch;
 	int							i;
 	struct fat_header			*header;
 	struct fat_arch				*arch;
 
-	header = (struct fat_header *)ptr;
-	nfat_arch = header->nfat_arch;
+	swap_fat_header((header = (struct fat_header *)ptr), l_endian);
 	arch = (void *)ptr + sizeof(*header);
 	i = 0;
-	while (i < nfat_arch)
+	ft_printf("NARCH : %u\n", header->nfat_arch);
+	while (i < header->nfat_arch)
 	{
-		nm((char *)((void *)ptr + arch->offset));
+		ft_printf("ARCH SIZE : %u\n", arch->size);
+		nm((void *)ptr + arch->offset);
 		arch = (void *)arch + arch->size;
 		i++;
 	}
@@ -256,9 +257,9 @@ void nm(char *ptr)
 	int magic_number;
 	magic_number = *(int *)ptr;
 	if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
-		handle_64(ptr);
+		handle_64(ptr, (magic_number == MH_MAGIC_64) ? 0 : 1);
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
-		handle_fat(ptr);
+		handle_fat(ptr, (magic_number == FAT_MAGIC) ? 0 : 1);
 }
 
 int main(int argc, char **argv)
@@ -277,7 +278,7 @@ int main(int argc, char **argv)
 			return (EXIT_FAILURE);
 		if (fstat(fd, &buf) < 0)
 			return (EXIT_FAILURE);
-		if ((ptr = mmap(0, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+		if ((ptr = mmap(0, buf.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 			return (EXIT_FAILURE);
 
 		nm(ptr);
