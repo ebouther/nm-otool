@@ -27,25 +27,25 @@ INC = $(addprefix $(INC_DIR), $(INC_FILES))
 all: $(OBJ_DIR) $(LIBFT) $(NAME) auteur
 
 $(OBJ_DIR):
-	@mkdir -p $(OBJ_DIR)
+	mkdir -p $(OBJ_DIR)
 
 norme: $(SRC)
 	norminette $(SRC) $(INC)
 
 $(NAME): $(OBJ)
-	@$(CC) -o $@ $^ $(LFLAGS)
+	$(CC) -o $@ $^ $(LFLAGS)
 
 $(LIBFT):
-	@make -C libft/
+	make -C libft/
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c $(INC)
-	@$(CC) $(CFLAGS) $(IFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) $(IFLAGS) -o $@ -c $<
 
 clean:
-	@make -C libft/ clean
-	@rm -rf $(OBJ_DIR)
+	make -C libft/ clean
+	rm -rf $(OBJ_DIR)
 
 fclean: clean
-	@rm -f $(NAME) $(LIBFT)
+	rm -f $(NAME) $(LIBFT)
 
 re: fclean all

@@ -241,24 +241,36 @@ void handle_fat(char *ptr, uint8_t l_endian)
 	struct fat_arch				*arch;
 
 	swap_fat_header((header = (struct fat_header *)ptr), l_endian);
-	arch = (void *)ptr + sizeof(*header);
+	swap_fat_arch(arch = (void *)ptr + sizeof(*header), header->nfat_arch, l_endian);
 	i = 0;
-	ft_printf("NARCH : %u\n", header->nfat_arch);
+	//ft_printf("NARCH : %u\n", header->nfat_arch);
 	while (i < header->nfat_arch)
 	{
-		ft_printf("ARCH SIZE : %u\n", arch->size);
-		nm((void *)ptr + arch->offset);
-		arch = (void *)arch + arch->size;
+		//ft_printf("[%d] ARCH : %#x\n", i, arch);
+		//ft_printf("[%d] ARCH CPUTYPE : %u\n", i, arch->cputype);
+		//ft_printf("[%d] ARCH SIZE : %u\n", i, arch->size);
+		//ft_printf("[%d] ARCH OFFSET : %u\n", i, arch->offset);
+		if (arch->cputype == CPU_TYPE_X86_64)
+		{
+			nm(NULL, (void *)ptr + arch->offset);
+			break;
+		}
+		arch = (void *)arch + sizeof(*arch);
 		i++;
 	}
 }
 
-void nm(char *ptr)
+void nm(char *f, char *ptr)
 {
 	unsigned int	magic_number;
+
 	magic_number = *(unsigned int *)ptr;
 	if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
+	{
+		if (f)
+			ft_printf("\n%s:\n", f);
 		handle_64(ptr, (magic_number == MH_MAGIC_64) ? 0 : 1);
+	}
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
 		handle_fat(ptr, (magic_number == FAT_MAGIC) ? 0 : 1);
 	else
@@ -275,8 +287,8 @@ int main(int argc, char **argv)
 	i = 1;
 	while (i < argc)
 	{
-		if (argc > 2)
-			ft_printf("\n%s:\n", argv[i]);
+		//if (argc > 2)
+		//	ft_printf("\n%s:\n", argv[i]);
 		if ((fd = open(argv[i], O_RDONLY)) < 0)
 			return (EXIT_FAILURE);
 		if (fstat(fd, &buf) < 0)
@@ -284,7 +296,7 @@ int main(int argc, char **argv)
 		if ((ptr = mmap(0, buf.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 			return (EXIT_FAILURE);
 
-		nm(ptr);
+		nm((argc > 2 ? argv[i] : NULL), ptr);
 
 		if (munmap(ptr, buf.st_size) < 0)
 			return (EXIT_FAILURE);
