@@ -30,9 +30,9 @@ void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 				}
 			}
 			if (lst->type != 'U')
-				ft_printf("%016llx", lst->value);
+				ft_printf(lst->arch_64 ? "%016llx" : "%08llx", lst->value);
 			else
-				ft_printf("                ");
+				ft_printf(lst->arch_64 ? "                " : "        ");
 			ft_printf(" %c", lst->type);
 			//ft_printf(" %d", lst->n_sect); // DBG
 			ft_printf(" %s\n", lst->name);
@@ -136,12 +136,11 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 {
 	int				i;
 	char			*stringtable;
-	struct nlist	*el;
+	struct nlist_64	*el;
 	t_sym			*sym;
 	t_sym			*last_node;
 
 	i = 0;
-	el = (void *)ptr + symoff;
 	stringtable = (void *)ptr + stroff;
 	sym = *sym_lst;
 	last_node = NULL;
@@ -153,8 +152,9 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 	sym = last_node;
 	while (i < nsyms)
 	{
-		if (ft_strlen(stringtable + el[i].n_un.n_strx) > 0
-			&& !(el[i].n_type & N_STAB))
+		el = (void *)ptr + symoff + (i * (arch_64 ? sizeof(struct nlist_64) : sizeof(struct nlist)));
+		if (ft_strlen(stringtable + el->n_un.n_strx) > 0
+			&& !(el->n_type & N_STAB))
 		{
 			if (sym == NULL)
 			{
@@ -167,32 +167,32 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 				sym = sym->next;
 			}
 
-			//ft_printf("SYM: %s\n", stringtable + el[i].n_un.n_strx);
-			*sym = (t_sym){0, 0, el[i].n_sect, stringtable + el[i].n_un.n_strx, NULL};
+			//ft_printf("SYM: %s\n", stringtable + el->n_un.n_strx);
+			*sym = (t_sym){arch_64, 0, 0, el->n_sect, stringtable + el->n_un.n_strx, NULL};
 
-			//if ((el[i].n_type & N_PEXT))
+			//if ((el->n_type & N_PEXT))
 			//	ft_printf("N_PEXT\n");
-		    //ft_printf("SYMBOL [%x] [%s] [%d]\n", (unsigned int)sym,stringtable + el[i].n_un.n_strx, el[i].n_sect);
+		    //ft_printf("SYMBOL [%x] [%s] [%d]\n", (unsigned int)sym,stringtable + el->n_un.n_strx, el->n_sect);
 
-			if ((el[i].n_type & N_TYPE) == N_UNDF)
+			if ((el->n_type & N_TYPE) == N_UNDF)
 			{
-				sym->type = (el[i].n_sect == NO_SECT) ? 'U' : 'C';
+				sym->type = (el->n_sect == NO_SECT) ? 'U' : 'C';
 			}
-			else if ((el[i].n_type & N_TYPE) == N_ABS)
+			else if ((el->n_type & N_TYPE) == N_ABS)
 				sym->type = 'A';
-			else if ((el[i].n_type & N_TYPE) == N_SECT)
+			else if ((el->n_type & N_TYPE) == N_SECT)
 			{
-				sym->value = (arch_64 ? (uint64_t)((struct nlist_64 *)el)[i].n_value : el[i].n_value);
+				sym->value = (arch_64 ? el->n_value : (uint64_t)((struct nlist *)el)->n_value);
 				sym->type = 'T';
-				//sym->n_sect = el[i].n_sect;
+				//sym->n_sect = el->n_sect;
 			}
-			else if ((el[i].n_type & N_TYPE) == N_PBUD)
+			else if ((el->n_type & N_TYPE) == N_PBUD)
 				sym->type = 'U';
-			else if (el[i].n_type & N_INDR)
+			else if (el->n_type & N_INDR)
 				sym->type = 'I';
 			else
 				sym->type = '?';
-			if (!(el[i].n_type & N_EXT)
+			if (!(el->n_type & N_EXT)
 					&& sym->type >= 'A'
 					&& sym->type <= 'Z')
 				sym->type += 32;
@@ -225,7 +225,7 @@ void handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64)
 		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
-		if (lc->cmd == LC_SEGMENT_64)
+		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT)
 			add_sect_lst(lc, &sect_lst, arch_64);
 		else if (lc->cmd == LC_SYMTAB)
 		{

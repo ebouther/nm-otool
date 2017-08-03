@@ -28,7 +28,8 @@
 
 typedef struct 		s_sym
 {
-	uint32_t		value;
+	uint8_t			arch_64;
+	uint64_t		value;
 	char			type;
 	uint8_t			n_sect;
 	char			*name;
