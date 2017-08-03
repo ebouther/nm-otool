@@ -1,7 +1,7 @@
 NAME := ft_nm
 
 CC = gcc 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 LFLAGS = -L./libft -lft
 IFLAGS = -I./inc/ -I./libft/includes/
 

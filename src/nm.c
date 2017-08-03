@@ -75,17 +75,19 @@ void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
 	}
 }
 
-void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
+void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64)
 {
-
-	struct section_64		*section;
+	uint32_t				nsect;
+	char					*sectname;
+	void					*section;
 	uint8_t					n;
 	t_sect					*sect;
 	t_sect					*last_node;
 
-	section = (struct section_64 *)((void *)seg + sizeof(struct segment_command_64));
+	nsect = (arch_64 ? ((struct segment_command_64 *)seg)->nsects : ((struct segment_command *)seg)->nsects);
+	section = ((void *)seg +
+			(arch_64 ? sizeof(struct segment_command_64) : sizeof(struct segment_command)));
 	n = 0;
-
 	sect = *sect_lst;
 	last_node = NULL;
 	while (sect)
@@ -96,7 +98,7 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 	sect = last_node;
 	//ft_printf("SEGNAME : %s\n", seg->segname);
 	//ft_printf("SECTNAME : %s", section[n].sectname);
-	while (n < seg->nsects)
+	while (n < nsect)
 	{
 		//ft_printf("SECTION (%d) \n", n);
 		if (sect == NULL)
@@ -111,14 +113,15 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 		}
 
 		*sect = (t_sect){'S', NULL};
+		sectname = (arch_64 ? ((struct section_64 *)section)[n].sectname : ((struct section *)section)[n].sectname);
 
-		if (strcmp(section[n].sectname, SECT_TEXT) == 0) //&&
+		if (strcmp(sectname, SECT_TEXT) == 0) //&&
 			   //strcmp(section[n].segname, SEG_TEXT) == 0)
 			sect->section = 'T';
-		else if (strcmp(section[n].sectname, SECT_DATA) == 0) //&&
+		else if (strcmp(sectname, SECT_DATA) == 0) //&&
 			//strcmp(section[n].segname, SEG_DATA) == 0)
 			sect->section = 'D';
-		else if (strcmp(section[n].sectname, SECT_BSS) == 0) //&&
+		else if (strcmp(sectname, SECT_BSS) == 0) //&&
 			//strcmp(section[n].segname, SEG_DATA) == 0)
 			sect->section = 'B';
 		//else if (strcmp(section[n].sectname, SECT_COMMON) == 0) //&&
@@ -129,11 +132,11 @@ void	add_sect_lst(struct segment_command_64 *seg, t_sect **sect_lst)
 
 }
 
-void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_lst)
+void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_lst, uint8_t arch_64)
 {
 	int				i;
 	char			*stringtable;
-	struct nlist_64	*el;
+	struct nlist	*el;
 	t_sym			*sym;
 	t_sym			*last_node;
 
@@ -179,7 +182,7 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 				sym->type = 'A';
 			else if ((el[i].n_type & N_TYPE) == N_SECT)
 			{
-				sym->value = el[i].n_value;
+				sym->value = (arch_64 ? (uint64_t)((struct nlist_64 *)el)[i].n_value : el[i].n_value);
 				sym->type = 'T';
 				//sym->n_sect = el[i].n_sect;
 			}
@@ -200,31 +203,34 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 }
 
 
-void handle_64(char *ptr, uint8_t l_endian)
+void handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64)
 {
 	int							ncmds;
 	int							i;
-	struct mach_header_64		*header;
+	struct mach_header 			*header;
 	struct load_command			*lc;
 	struct symtab_command		*sym;
 	t_sym						*sym_lst;
 	t_sect						*sect_lst;
 
 	(void)l_endian;
-	header = (struct mach_header_64 *)ptr;
+	header = (struct mach_header *)ptr;
 	ncmds = header->ncmds;
-	lc = (void *)ptr + sizeof(*header);
+	//lc = (void *)ptr + sizeof(*header);
+	lc = (void *)ptr + (arch_64 ? sizeof(struct mach_header_64) : sizeof(struct mach_header));
 	i = 0;
 	sym_lst = NULL;
 	sect_lst = NULL;
+	if (f)
+		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64)
-			add_sect_lst((struct segment_command_64 *)lc, &sect_lst);
+			add_sect_lst(lc, &sect_lst, arch_64);
 		else if (lc->cmd == LC_SYMTAB)
 		{
 			sym = (struct symtab_command *)lc;
-			add_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr, &sym_lst);
+			add_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr, &sym_lst, arch_64);
 			//ft_printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
 		}
 		lc = (void *)lc + lc->cmdsize;
@@ -265,16 +271,14 @@ void nm(char *f, char *ptr)
 	unsigned int	magic_number;
 
 	magic_number = *(unsigned int *)ptr;
-	if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
-	{
-		if (f)
-			ft_printf("\n%s:\n", f);
-		handle_64(ptr, (magic_number == MH_MAGIC_64) ? 0 : 1);
-	}
+	if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
+		handle_macho(f, ptr, (magic_number == MH_MAGIC) ? 0 : 1, 0);
+	else if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
+		handle_macho(f, ptr, (magic_number == MH_MAGIC_64) ? 0 : 1, 1);
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
 		handle_fat(ptr, (magic_number == FAT_MAGIC) ? 0 : 1);
 	else
-		printf("BAD FORMAT\n");
+		printf("BAD FORMAT (MAGIC NUMBER : %x)\n", magic_number);
 }
 
 int main(int argc, char **argv)
@@ -287,8 +291,6 @@ int main(int argc, char **argv)
 	i = 1;
 	while (i < argc)
 	{
-		//if (argc > 2)
-		//	ft_printf("\n%s:\n", argv[i]);
 		if ((fd = open(argv[i], O_RDONLY)) < 0)
 			return (EXIT_FAILURE);
 		if (fstat(fd, &buf) < 0)
