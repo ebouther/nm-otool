@@ -1,6 +1,13 @@
 #include "nm.h"
 #include "swap.h"
 
+void disp_err(char *f, char *err)
+{
+	ft_putstr_fd("nm: ", 2);
+	ft_putstr_fd(f, 2);
+	ft_putstr_fd(err, 2);
+}
+
 void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 {
 	t_sect	*begin;
@@ -168,7 +175,8 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 			}
 
 			//ft_printf("SYM: %s\n", stringtable + el->n_un.n_strx);
-			*sym = (t_sym){arch_64, 0, 0, el->n_sect, stringtable + el->n_un.n_strx, NULL};
+			*sym = (t_sym){arch_64, arch_64 ? el->n_value : (uint64_t)((struct nlist *)el)->n_value, '?', el->n_sect, stringtable + el->n_un.n_strx, NULL};
+				
 
 			//if ((el->n_type & N_PEXT))
 			//	ft_printf("N_PEXT\n");
@@ -182,7 +190,6 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 				sym->type = 'A';
 			else if ((el->n_type & N_TYPE) == N_SECT)
 			{
-				sym->value = (arch_64 ? el->n_value : (uint64_t)((struct nlist *)el)->n_value);
 				sym->type = 'T';
 				//sym->n_sect = el->n_sect;
 			}
@@ -278,7 +285,7 @@ void nm(char *f, char *ptr)
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
 		handle_fat(ptr, (magic_number == FAT_MAGIC) ? 0 : 1);
 	else
-		printf("BAD FORMAT (MAGIC NUMBER : %x)\n", magic_number);
+		disp_err(f, " The file was not recognized as a valid object file.\n");
 }
 
 int main(int argc, char **argv)
@@ -292,7 +299,11 @@ int main(int argc, char **argv)
 	while (i < argc)
 	{
 		if ((fd = open(argv[i], O_RDONLY)) < 0)
-			return (EXIT_FAILURE);
+		{
+			disp_err(argv[i++], "Permission denied.\n");
+			continue ;
+		}
+			//return (EXIT_FAILURE);
 		if (fstat(fd, &buf) < 0)
 			return (EXIT_FAILURE);
 		if ((ptr = mmap(0, buf.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
@@ -306,6 +317,5 @@ int main(int argc, char **argv)
 			return (EXIT_FAILURE);
 		i++;
 	}
-	fflush(stdout);
 	return (0);
 }
