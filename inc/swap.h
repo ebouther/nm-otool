@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:36:00 by ebouther          #+#    #+#             */
-/*   Updated: 2017/06/07 18:15:39 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/05 20:08:00 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <stdint.h>
 # include <mach-o/fat.h>
+# include <mach-o/loader.h>
 # include <mach/machine.h>
 
 # define ARCH_64 1
@@ -22,6 +23,7 @@
 
 	uint32_t	swap_uint32(uint32_t x);
 	void swap_fat_header(struct fat_header *fat_header, uint8_t l_endian);
-	void swap_fat_arch(struct fat_arch *fat_archs, uint32_t nfat_arch,uint8_t l_endian);
+	void swap_fat_arch(struct fat_arch *fat_archs, uint32_t nfat_arch, uint8_t l_endian);
+	void swap_load_command(struct load_command *lc, uint8_t l_endian);
 
 #endif

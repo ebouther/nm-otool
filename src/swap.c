@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:32:57 by ebouther          #+#    #+#             */
-/*   Updated: 2017/06/07 19:01:26 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/05 20:09:00 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,15 @@ void swap_fat_header(struct fat_header *fat_header, uint8_t l_endian)
 	fat_header->nfat_arch = swap_uint32(fat_header->nfat_arch);
 }
 
-void swap_fat_arch(struct fat_arch *fat_archs, uint32_t nfat_arch,uint8_t l_endian)
+void swap_load_command(struct load_command *lc, uint8_t l_endian)
+{
+	if (!l_endian)
+		return ;
+	lc->cmd     = swap_uint32(lc->cmd);
+	lc->cmdsize = swap_uint32(lc->cmdsize);
+}
+
+void swap_fat_arch(struct fat_arch *fat_archs, uint32_t nfat_arch, uint8_t l_endian)
 {
 	uint32_t i;
 
