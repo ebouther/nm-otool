@@ -252,34 +252,40 @@ void handle_ar(char *ptr)
 {
 	struct ar_hdr *ar_header;	
 	unsigned int filename_pad;
+	char 		*filename;
 
-	ar_header = (struct ar_hdr *)(ptr + SARMAG);	
+	ar_header = (struct ar_hdr *)(ptr + SARMAG);
 	printf("HEADER : %s\n", ar_header->ar_name);
-	int i;
+	while (ar_header) {
 
-	printf("\n-----\n");
-   	i = 0;
-	//while (i < (int)sizeof(ar_header->ar_size))
-	//{
-	//	//int ar_size = ft_atoi(*(unsigned int *)ar)
-	//	printf("%d", ar_header->ar_size[i]);
-	//	
-	//	i++;
-	//}
-	filename_pad = ft_atoi(ar_header->ar_name + ft_strlen(AR_EFMT1));
-	char *ar_member_name = ptr + SARMAG + sizeof(struct ar_hdr);
-	//if (ft_strcmp(ar_member_name, SYMDEF_64) == 0)
-	//	printf("SYMDEF_64\n");
-	if (ft_strcmp(ar_member_name, SYMDEF) == 0)
-		printf("SYMDEF\n");
-	struct ranlib	*ranlib;
-	ranlib = (struct ranlib *)(ar_member_name + filename_pad);  
-	printf("RAN STRX : %d\n", ranlib->ran_un.ran_strx);
-	printf("RAN OFF : %d\n", ranlib->ran_off);
-	printf("\n-----\n");
+		int ar_size = ft_atoi(ar_header->ar_size);
 
-	ar_header = (struct ar_hdr *)(ptr + ranlib->ran_off);	
-	printf("HEADER : %s\n", ar_header->ar_name);
+		ar_header = (struct ar_hdr *)((void*)ar_header + sizeof(struct ar_hdr) + ar_size);
+		printf("HEADER : %s\n", ar_header->ar_name);
+
+		if (ft_strncmp(ar_header->ar_name, AR_EFMT1, ft_strlen(AR_EFMT1)) == 0)
+		{
+			filename_pad = ft_atoi(ar_header->ar_name + ft_strlen(AR_EFMT1));
+			printf("%d\n", filename_pad);
+			filename = ar_header->ar_name + sizeof(struct ar_hdr);
+			printf("FILENAME 1 :%s\n", filename);
+			nm(NULL, (char *)ar_header + sizeof(struct ar_hdr) + filename_pad);
+		} else {
+		
+			filename = ar_header->ar_name;
+			int i = 0;
+			while (filename[i]) {
+				if (filename[i] == 0x20)
+				{
+					filename[i] = 0;
+					break ;
+				}
+				i++;
+			}
+			printf("FILENAME :%s\n", filename);
+			nm(NULL, (char *)ar_header + sizeof(struct ar_hdr));
+		}
+	}
 }
 
 void handle_fat(char *ptr, uint8_t l_endian)
