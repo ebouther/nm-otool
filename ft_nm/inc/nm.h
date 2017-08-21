@@ -44,6 +44,6 @@ typedef struct 		s_sect
 	struct s_sect	*next;
 }					t_sect;
 
-void nm(char *f, char *ptr);
+void nm(char *f, uint8_t disp, char *ptr);
 
 #endif

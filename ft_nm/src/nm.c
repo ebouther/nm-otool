@@ -248,28 +248,32 @@ void handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64)
 	disp_sym_lst(sym_lst, sect_lst);
 }
 
-void handle_ar(char *ptr)
+void handle_ar(char *f, char *ptr)
 {
 	struct ar_hdr *ar_header;	
 	unsigned int filename_pad;
 	char 		*filename;
 
 	ar_header = (struct ar_hdr *)(ptr + SARMAG);
-	printf("HEADER : %s\n", ar_header->ar_name);
-	while (ar_header) {
+	int ar_size = ft_atoi(ar_header->ar_size);
+	//filename_pad = ft_atoi(ar_header->ar_name + ft_strlen(AR_EFMT1));
+	//uint32_t ranlibs_size = *((uint32_t *)((void *)ar_header + sizeof(struct ar_hdr) + filename_pad));
+	//printf("RANLIBS SIZE : %d\n", ranlibs_size);
+	//printf("SIZEOF RANLIB %lu\n", ranlibs_size / sizeof(struct ranlib_64));
 
-		int ar_size = ft_atoi(ar_header->ar_size);
+	while ((ar_header = (struct ar_hdr *)((void*)ar_header + sizeof(struct ar_hdr) + ar_size))
+		   && ((char *)ar_header)[0]) {
 
-		ar_header = (struct ar_hdr *)((void*)ar_header + sizeof(struct ar_hdr) + ar_size);
-		printf("HEADER : %s\n", ar_header->ar_name);
+		
+		ar_size = ft_atoi(ar_header->ar_size);
+		printf("SIZE : (%d)\n", ar_size);
 
 		if (ft_strncmp(ar_header->ar_name, AR_EFMT1, ft_strlen(AR_EFMT1)) == 0)
 		{
 			filename_pad = ft_atoi(ar_header->ar_name + ft_strlen(AR_EFMT1));
-			printf("%d\n", filename_pad);
 			filename = ar_header->ar_name + sizeof(struct ar_hdr);
-			printf("FILENAME 1 :%s\n", filename);
-			nm(NULL, (char *)ar_header + sizeof(struct ar_hdr) + filename_pad);
+			ft_printf("\n%s(%s):\n", f, filename);
+			nm(NULL, 0, (char *)ar_header + sizeof(struct ar_hdr) + filename_pad);
 		} else {
 		
 			filename = ar_header->ar_name;
@@ -282,13 +286,13 @@ void handle_ar(char *ptr)
 				}
 				i++;
 			}
-			printf("FILENAME :%s\n", filename);
-			nm(NULL, (char *)ar_header + sizeof(struct ar_hdr));
+			ft_printf("\n%s(%s):\n", f, filename);
+			nm(NULL, 0, (char *)ar_header + sizeof(struct ar_hdr));
 		}
 	}
 }
 
-void handle_fat(char *ptr, uint8_t l_endian)
+void handle_fat(char *f, char *ptr, uint8_t l_endian)
 {
 	uint32_t					i;
 	struct fat_header			*header;
@@ -306,7 +310,7 @@ void handle_fat(char *ptr, uint8_t l_endian)
 		//ft_printf("[%d] ARCH OFFSET : %u\n", i, arch->offset);
 		if (arch->cputype == CPU_TYPE_X86_64)
 		{
-			nm(NULL, (void *)ptr + arch->offset);
+			nm(f, 0, (void *)ptr + arch->offset);
 			return;
 		}
 		arch = (void *)arch + sizeof(*arch);
@@ -315,26 +319,26 @@ void handle_fat(char *ptr, uint8_t l_endian)
 	if (header->nfat_arch > 0)
 	{
 		arch = (void *)ptr + sizeof(*header);
-		nm(NULL, (void *)ptr + arch->offset);
+		nm(f, 0, (void *)ptr + arch->offset);
 	}
 }
 
-void nm(char *f, char *ptr)
+void nm(char *f, uint8_t disp, char *ptr)
 {
 	unsigned int	magic_number;
 
 	magic_number = *(unsigned int *)ptr;
 	if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
-		handle_macho(f, ptr, (magic_number == MH_MAGIC) ? 0 : 1, 0);
+		handle_macho(disp ? f : NULL, ptr, (magic_number == MH_MAGIC) ? 0 : 1, 0);
 	else if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
-		handle_macho(f, ptr, (magic_number == MH_MAGIC_64) ? 0 : 1, 1);
+		handle_macho(disp ? f : NULL, ptr, (magic_number == MH_MAGIC_64) ? 0 : 1, 1);
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
-		handle_fat(ptr, (magic_number == FAT_MAGIC) ? 0 : 1);
+		handle_fat(f, ptr, (magic_number == FAT_MAGIC) ? 0 : 1);
 	else if (magic_number == *((unsigned int *)ARMAG))
-		handle_ar(ptr);
+		handle_ar(f, ptr);
 	else
-		ft_printf("MAGIC NUMBER : %x\n", magic_number);
-		//disp_err(f, " The file was not recognized as a valid object file.\n");
+		//ft_printf("MAGIC NUMBER : %x\n", magic_number);
+		disp_err(f, " The file was not recognized as a valid object file.\n");
 }
 
 int main(int argc, char **argv)
@@ -344,27 +348,25 @@ int main(int argc, char **argv)
 	struct stat	buf;
 	int			i;
 
-	i = 1;
-	while (i < argc)
+	i = 0;
+	while (++i < argc)
 	{
 		if ((fd = open(argv[i], O_RDONLY)) < 0)
 		{
-			disp_err(argv[i++], "Permission denied.\n");
+			disp_err(argv[i], "Permission denied.\n");
 			continue ;
 		}
-			//return (EXIT_FAILURE);
 		if (fstat(fd, &buf) < 0)
-			return (EXIT_FAILURE);
+			continue;
 		if ((ptr = mmap(0, buf.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-			return (EXIT_FAILURE);
+			continue;
 
-		nm((argc > 2 ? argv[i] : NULL), ptr);
+		nm(argv[i], argc > 2 ? 1 : 0, ptr);
 
 		if (munmap(ptr, buf.st_size) < 0)
-			return (EXIT_FAILURE);
+			continue;
 		if (close(fd) == -1)
-			return (EXIT_FAILURE);
-		i++;
+			continue;
 	}
 	return (0);
 }
