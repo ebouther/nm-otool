@@ -1,7 +1,7 @@
 NAME := ft_nm
 
 CC = gcc 
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -Wall -Wextra -Werror -g 
 
 LIBFT_PATH = ../libft/
 LIBFT = $(addprefix $(LIBFT_PATH),libft.a)

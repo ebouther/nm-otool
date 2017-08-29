@@ -55,6 +55,7 @@ void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
 	uint8_t	sorted;
 	t_sym	*sym;
 	t_sym	tmp;
+	int		diff;
    
 	sorted = 0;
 	if (!lst)
@@ -65,7 +66,8 @@ void sort_sym_lst(t_sym **lst)//, uint8_t sort_by)
 		sym	= *lst;
 		while (sym && sym->next)
 		{
-			if (strcmp(sym->name, sym->next->name) > 0)
+			if ((diff = strcmp(sym->name, sym->next->name)) > 0
+				|| (diff == 0 && sym->value > sym->next->value))
 			{
 				tmp = *sym;
 				sym->value = sym->next->value;
@@ -354,7 +356,10 @@ void handle_fat(char *f, char *ptr, uint8_t l_endian)
 	arch = (void *)ptr + sizeof(*header);
 	while (i < header->nfat_arch)
 	{
-		ft_printf("\n%s (for architecture %s):\n", f, NXGetArchInfoFromCpuType(arch->cputype, arch->cpusubtype)->name);
+		if (header->nfat_arch > 1)
+			ft_printf("\n%s (for architecture %s):\n", f, NXGetArchInfoFromCpuType(arch->cputype, arch->cpusubtype)->name);
+		else
+			ft_printf("%s:\n", f);
 		nm(f, 0, (void *)ptr + arch->offset);
 		arch = (void *)arch + sizeof(*arch);
 		i++;
