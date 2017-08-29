@@ -149,6 +149,7 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 
 	(void)l_endian;
 	i = 0;
+	//ft_printf("STROFF %d\n", stroff);
 	stringtable = (void *)ptr + stroff;
 	sym = *sym_lst;
 	last_node = NULL;
@@ -161,7 +162,32 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 	while (i < nsyms)
 	{
 		el = (void *)ptr + symoff + (i * (arch_64 ? sizeof(struct nlist_64) : sizeof(struct nlist)));
-		//el->n_un.n_strx = l_endian ? swap_uint32(el->n_un.n_strx) : el->n_un.n_strx;
+		//if (i == 0)
+		//	swap_nlist_64(el, nsyms, l_endian);
+
+
+		//ft_printf("\nEL : ---------------\n");
+		//for (size_t n = 0; n < sizeof(struct nlist_64); ++n) ft_printf("%02X ", ((unsigned char *)el)[n]);
+		//ft_printf("\n---------------\n");
+		//ft_printf("1_STRX %d\n", el->n_un.n_strx);
+		//ft_printf("\n1_NDESC %d\n", el->n_desc);
+		//ft_printf("1_N_VALUE %d\n", el->n_value);
+
+
+		el->n_un.n_strx =
+			l_endian ? 
+			swap_uint32(el->n_un.n_strx)
+			: el->n_un.n_strx;
+
+		el->n_desc = l_endian ? swap_uint16(el->n_desc) : el->n_desc;
+//		el->n_value = l_endian ?
+//								(arch_64 ? swap_uint64(el->n_value) : swap_uint32(el->n_value))
+//								: el->n_desc;
+
+		//ft_printf("STRX %d\n", el->n_un.n_strx);
+		//ft_printf("NDESC %d\n", el->n_desc);
+		//ft_printf("N_VALUE %d\n", el->n_value);
+
 		if (ft_strlen(stringtable + el->n_un.n_strx) > 0
 			&& !(el->n_type & N_STAB))
 		{
@@ -177,8 +203,11 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 			}
 
 			//ft_printf("SYM: %s\n", stringtable + el->n_un.n_strx);
-			*sym = (t_sym){arch_64, arch_64 ? el->n_value : (uint64_t)((struct nlist *)el)->n_value, '?', el->n_sect, stringtable + el->n_un.n_strx, NULL};
-				
+			*sym = (t_sym){arch_64, arch_64 ?
+											(l_endian ? swap_uint64(el->n_value) : el->n_value)
+											: (l_endian ? swap_uint32(el->n_value) : el->n_value), 
+											'?', el->n_sect, stringtable + el->n_un.n_strx, NULL};
+
 
 			//if ((el->n_type & N_PEXT))
 			//	ft_printf("N_PEXT\n");
@@ -197,7 +226,7 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 			}
 			else if ((el->n_type & N_TYPE) == N_PBUD)
 				sym->type = 'U';
-			else if (el->n_type & N_INDR)
+			else if ((el->n_type & N_TYPE) == N_INDR)
 				sym->type = 'I';
 			else
 				sym->type = '?';
@@ -223,7 +252,7 @@ void handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64)
 	t_sect						*sect_lst;
 
 	header = (struct mach_header *)ptr;
-	ncmds = header->ncmds;
+	ncmds = l_endian ? swap_uint32(header->ncmds) : header->ncmds;
 	swap_load_command(lc = (void *)ptr + (arch_64 ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), l_endian);
 	i = 0;
 	sym_lst = NULL;
@@ -237,8 +266,12 @@ void handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64)
 		}
 		else if (lc->cmd == LC_SYMTAB)
 		{
+			//printf("SYMTAB [%d]\n", i);
 			sym = (struct symtab_command *)lc;
-			add_symtab_lst(sym->nsyms, sym->symoff, sym->stroff, ptr, &sym_lst, arch_64, l_endian);
+
+			add_symtab_lst(l_endian ? swap_uint32(sym->nsyms) : sym->nsyms,
+							l_endian ? swap_uint32(sym->symoff) : sym->symoff,
+							l_endian ? swap_uint32(sym->stroff) : sym->stroff, ptr, &sym_lst, arch_64, l_endian);
 			//ft_printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
 		}
 		swap_load_command(lc = (void *)lc + lc->cmdsize, l_endian);
