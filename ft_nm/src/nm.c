@@ -354,11 +354,10 @@ void handle_fat(char *f, char *ptr, uint8_t l_endian)
 	arch = (void *)ptr + sizeof(*header);
 	while (i < header->nfat_arch)
 	{
-		ft_printf("%s (for architecture %#x):\n", f, arch);
+		ft_printf("\n%s (for architecture %s):\n", f, NXGetArchInfoFromCpuType(arch->cputype, arch->cpusubtype)->name);
 		nm(f, 0, (void *)ptr + arch->offset);
 		arch = (void *)arch + sizeof(*arch);
 		i++;
-		ft_putchar('\n');
 	}
 }
 

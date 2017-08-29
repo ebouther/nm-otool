@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:36:00 by ebouther          #+#    #+#             */
-/*   Updated: 2017/08/29 14:19:02 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/29 18:04:04 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <mach-o/fat.h>
 # include <mach-o/loader.h>
 # include <mach-o/nlist.h>
+# include <mach-o/arch.h>
 # include <mach/machine.h>
 
 # define ARCH_64 1
