@@ -36,6 +36,7 @@ void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 						((lst->type == 't') ? 32 : 0);
 				}
 			}
+			//ft_printf("ARCH64 : %d\n", lst->arch_64);
 			if (lst->type != 'U')
 				ft_printf(lst->arch_64 ? "%016llx" : "%08llx", lst->value);
 			else
@@ -205,7 +206,7 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 			//ft_printf("SYM: %s\n", stringtable + el->n_un.n_strx);
 			*sym = (t_sym){arch_64, arch_64 ?
 											(l_endian ? swap_uint64(el->n_value) : el->n_value)
-											: (l_endian ? swap_uint32(el->n_value) : el->n_value), 
+											: (l_endian ? (uint64_t)swap_uint32(el->n_value) : ((struct nlist *)el)->n_value), 
 											'?', el->n_sect, stringtable + el->n_un.n_strx, NULL};
 
 
@@ -349,10 +350,15 @@ void handle_fat(char *f, char *ptr, uint8_t l_endian)
 		arch = (void *)arch + sizeof(*arch);
 		i++;
 	}
-	if (header->nfat_arch > 0)
+	i = 0;
+	arch = (void *)ptr + sizeof(*header);
+	while (i < header->nfat_arch)
 	{
-		arch = (void *)ptr + sizeof(*header);
+		ft_printf("%s (for architecture %#x):\n", f, arch);
 		nm(f, 0, (void *)ptr + arch->offset);
+		arch = (void *)arch + sizeof(*arch);
+		i++;
+		ft_putchar('\n');
 	}
 }
 
