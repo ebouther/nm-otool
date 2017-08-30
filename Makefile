@@ -22,7 +22,6 @@ SRC_FILES =	ar.c \
 			swap.c \
 			utils.c
 
-NM_SRC = $(addprefix $(SRC_DIR), nm.c)
 
 OBJ_FILES = $(SRC_FILES:.c=.o)
 
@@ -35,6 +34,18 @@ INC_FILES = masks.h \
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(addprefix $(OBJ_DIR), $(OBJ_FILES))
 INC = $(addprefix $(INC_DIR), $(INC_FILES))
+
+# ---------- NM ----------- #
+
+
+NM_SRC_FILES = nm.c
+NM_SRC = $(addprefix $(SRC_DIR), $(NM_SRC_FILES))
+
+NM_OBJ_FILES =  $(NM_SRC_FILES:.c=.o)
+NM_OBJ = $(addprefix $(OBJ_DIR), $(NM_OBJ_FILES))
+# ------------------------- #
+
+
 
 .PHONY: all clean fclean re $(LIBFT) 
 
