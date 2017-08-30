@@ -1,9 +1,10 @@
-NAME := ft_nm
+FT_NM := ft_nm
+FT_OTOOL := ft_otool
 
 CC = gcc 
-CFLAGS = -Wall -Wextra -Werror -g 
+CFLAGS = -Wall -Wextra -Werror
 
-LIBFT_PATH = ../libft/
+LIBFT_PATH = ./libft/
 LIBFT = $(addprefix $(LIBFT_PATH),libft.a)
 
 LFLAGS = -L$(LIBFT_PATH) -lft
@@ -14,12 +15,22 @@ SRC_DIR = ./src/
 INC_DIR = ./inc/
 OBJ_DIR = ./obj/
 
-SRC_FILES =	nm.c \
-			swap.c
+SRC_FILES =	ar.c \
+			fat.c \
+			macho.c \
+			nm_otool.c \
+			swap.c \
+			utils.c
+
+NM_SRC = $(addprefix $(SRC_DIR), nm.c)
 
 OBJ_FILES = $(SRC_FILES:.c=.o)
-INC_FILES = nm.h \
-			swap.h
+
+INC_FILES = masks.h \
+			nm_otool.h \
+			swap.h \
+			utils.h \
+			nm.h
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(addprefix $(OBJ_DIR), $(OBJ_FILES))
@@ -27,7 +38,7 @@ INC = $(addprefix $(INC_DIR), $(INC_FILES))
 
 .PHONY: all clean fclean re $(LIBFT) 
 
-all: $(OBJ_DIR) $(LIBFT) $(NAME)
+all: $(OBJ_DIR) $(LIBFT) $(FT_NM)
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
@@ -35,7 +46,7 @@ $(OBJ_DIR):
 norme: $(SRC)
 	norminette $(SRC) $(INC)
 
-$(NAME): $(OBJ)
+$(FT_NM): $(OBJ) $(NM_OBJ)
 	$(CC) -o $@ $^ $(LFLAGS)
 
 $(LIBFT):
@@ -49,6 +60,6 @@ clean:
 	rm -rf $(OBJ_DIR)
 
 fclean: clean
-	rm -f $(NAME) $(LIBFT)
+	rm -f $(FT_NM) $(LIBFT)
 
 re: fclean all
