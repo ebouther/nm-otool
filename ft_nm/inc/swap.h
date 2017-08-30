@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:36:00 by ebouther          #+#    #+#             */
-/*   Updated: 2017/08/29 18:04:04 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/30 16:04:20 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,6 @@
 # include <mach-o/nlist.h>
 # include <mach-o/arch.h>
 # include <mach/machine.h>
-
-# define ARCH_64 1
-# define ARCH_32 0
 
 	uint64_t	swap_uint64(uint64_t x);
 	uint32_t	swap_uint32(uint32_t x);
