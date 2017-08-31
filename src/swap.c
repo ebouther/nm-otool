@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:32:57 by ebouther          #+#    #+#             */
-/*   Updated: 2017/08/31 16:40:40 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/31 18:08:14 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,28 +39,28 @@ uint64_t	swap_uint64(uint64_t x)
 }
 
 
-void swap_fat_header(struct fat_header *fat_header, uint8_t l_endian)
+void swap_fat_header(struct fat_header *fat_header, uint8_t b_endian)
 {
-	if (!l_endian)
+	if (!b_endian)
 		return ;
 	fat_header->magic = swap_uint32(fat_header->magic);
 	fat_header->nfat_arch = swap_uint32(fat_header->nfat_arch);
 }
 
 #include "libft.h"
-void swap_load_command(struct load_command *lc, uint8_t l_endian)
+void swap_load_command(struct load_command *lc, uint8_t b_endian)
 {
-	if (!l_endian)
+	if (!b_endian)
 		return ;
 	lc->cmd     = swap_uint32(lc->cmd);
 	lc->cmdsize = swap_uint32(lc->cmdsize);
 }
 
-void swap_fat_arch(struct fat_arch *fat_archs, uint32_t nfat_arch, uint8_t l_endian)
+void swap_fat_arch(struct fat_arch *fat_archs, uint32_t nfat_arch, uint8_t b_endian)
 {
 	uint32_t i;
 
-	if (!l_endian)
+	if (!b_endian)
 		return ;
 	i = 0;
 	while (i < nfat_arch)
@@ -74,11 +74,11 @@ void swap_fat_arch(struct fat_arch *fat_archs, uint32_t nfat_arch, uint8_t l_end
 	}
 }
 
-void	swap_nlist_64(struct nlist_64 *symbols, uint32_t nsyms, uint8_t l_endian)
+void	swap_nlist_64(struct nlist_64 *symbols, uint32_t nsyms, uint8_t b_endian)
 {
 	uint32_t i;
 
-	if (!l_endian)
+	if (!b_endian)
 		return ;
 	i = 0;
 	while (i < nsyms)

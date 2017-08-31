@@ -102,7 +102,7 @@ void sort_sym_lst(t_sym **lst)
 	}
 }
 
-void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t l_endian)
+void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t b_endian)
 {
 	uint32_t				nsect;
 	char					*sectname;
@@ -112,7 +112,7 @@ void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t l_endia
 	t_sect					*last_node;
 
 	nsect = (arch_64 ? ((struct segment_command_64 *)seg)->nsects : ((struct segment_command *)seg)->nsects);
-	nsect = l_endian ? swap_uint32(nsect) : nsect;
+	nsect = b_endian ? swap_uint32(nsect) : nsect;
 	section = ((void *)seg +
 			(arch_64 ? sizeof(struct segment_command_64) : sizeof(struct segment_command)));
 	n = 0;
@@ -158,7 +158,7 @@ void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t l_endia
 	}
 }
 
-void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_lst, uint8_t arch_64, uint8_t l_endian)
+void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_lst, uint8_t arch_64, uint8_t b_endian)
 {
 	int				i;
 	char			*stringtable;
@@ -166,7 +166,6 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 	t_sym			*sym;
 	t_sym			*last_node;
 
-	(void)l_endian;
 	i = 0;
 	//ft_printf("STROFF %d\n", stroff);
 	stringtable = (void *)ptr + stroff;
@@ -182,11 +181,11 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 	{
 		el = (void *)ptr + symoff + (i * (arch_64 ? sizeof(struct nlist_64) : sizeof(struct nlist)));
 		el->n_un.n_strx =
-			l_endian ? 
+			b_endian ? 
 			swap_uint32(el->n_un.n_strx)
 			: el->n_un.n_strx;
 
-		el->n_desc = l_endian ? swap_uint16(el->n_desc) : el->n_desc;
+		el->n_desc = b_endian ? swap_uint16(el->n_desc) : el->n_desc;
 
 		if (ft_strlen(stringtable + el->n_un.n_strx) > 0
 			&& !(el->n_type & N_STAB))
@@ -204,8 +203,8 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 
 			//ft_printf("SYM: %s\n", stringtable + el->n_un.n_strx);
 			*sym = (t_sym){arch_64, arch_64 ?
-				(l_endian ? swap_uint64(el->n_value) : el->n_value)
-				: (l_endian ? (uint64_t)swap_uint32(((struct nlist *)el)->n_value) : ((struct nlist *)el)->n_value), 
+				(b_endian ? swap_uint64(el->n_value) : el->n_value)
+				: (b_endian ? (uint64_t)swap_uint32(((struct nlist *)el)->n_value) : ((struct nlist *)el)->n_value), 
 				'?', el->n_sect, stringtable + el->n_un.n_strx, NULL};
 
 
@@ -256,27 +255,27 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 	*sect_lst = NULL;
 
 	header = (struct mach_header *)ptr;
-	ncmds = is_le(mask) ? swap_uint32(header->ncmds) : header->ncmds;
-	swap_load_command(lc = ((void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header))), is_le(mask));
+	ncmds = is_be(mask) ? swap_uint32(header->ncmds) : header->ncmds;
+	swap_load_command(lc = ((void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header))), is_be(mask));
 	i = 0;
 	if (f)
 		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
-			add_sect_lst(lc, sect_lst, is_arch_64(mask), is_le(mask));
+			add_sect_lst(lc, sect_lst, is_arch_64(mask), is_be(mask));
 		}
 		else if (lc->cmd == LC_SYMTAB)
 		{
 			//printf("SYMTAB [%d]\n", i);
 			sym = (struct symtab_command *)lc;
 
-			add_symtab_lst(is_le(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
-							is_le(mask) ? swap_uint32(sym->symoff) : sym->symoff,
-							is_le(mask) ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, is_arch_64(mask), is_le(mask));
+			add_symtab_lst(is_be(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
+							is_be(mask) ? swap_uint32(sym->symoff) : sym->symoff,
+							is_be(mask) ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, is_arch_64(mask), is_be(mask));
 			//ft_printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
 		}
-		swap_load_command(lc = (void *)lc + lc->cmdsize, is_le(mask));
+		swap_load_command(lc = (void *)lc + lc->cmdsize, is_be(mask));
 		i++;
 	}
 	sort_sym_lst(sym_lst);
@@ -284,7 +283,7 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 	free_lists(sym_lst, sect_lst);
 }
 
-void	otool_section(void *seg, uint8_t arch_64, uint8_t l_endian, char *ptr)
+void	otool_section(void *seg, uint8_t arch_64, uint8_t b_endian, char *ptr)
 {
 	uint32_t				nsect;
 	char					*sectname;
@@ -292,7 +291,7 @@ void	otool_section(void *seg, uint8_t arch_64, uint8_t l_endian, char *ptr)
 	uint8_t					n;
 
 	nsect = (arch_64 ? ((struct segment_command_64 *)seg)->nsects : ((struct segment_command *)seg)->nsects);
-	nsect = l_endian ? swap_uint32(nsect) : nsect;
+	nsect = b_endian ? swap_uint32(nsect) : nsect;
 	section = ((void *)seg +
 			(arch_64 ? sizeof(struct segment_command_64) : sizeof(struct segment_command)));
 	n = 0;
@@ -319,17 +318,17 @@ void	otool_macho(char *f, char *ptr, uint8_t mask)
 	struct load_command			*lc;
 
 	header = (struct mach_header *)ptr;
-	ncmds = is_le(mask) ? swap_uint32(header->ncmds) : header->ncmds;
-	swap_load_command(lc = (void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), is_le(mask));
+	ncmds = is_be(mask) ? swap_uint32(header->ncmds) : header->ncmds;
+	swap_load_command(lc = (void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), is_be(mask));
 	i = 0;
 	if (f)
 		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
-			otool_section(lc, is_arch_64(mask), is_le(mask), ptr);
+			otool_section(lc, is_arch_64(mask), is_be(mask), ptr);
 		}
-		swap_load_command(lc = (void *)lc + lc->cmdsize, is_le(mask));
+		swap_load_command(lc = (void *)lc + lc->cmdsize, is_be(mask));
 		i++;
 	}
 }

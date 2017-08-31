@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/31 14:29:50 by ebouther          #+#    #+#             */
-/*   Updated: 2017/08/31 15:59:16 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/31 18:07:19 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,8 @@ void	handle_fat(char *f, char *ptr, uint8_t mask)
 	struct fat_header			*header;
 	struct fat_arch				*arch;
 
-	swap_fat_header((header = (struct fat_header *)ptr), mask & ENDIANNESS_MASK);
-	swap_fat_arch(arch = (void *)ptr + sizeof(*header), header->nfat_arch, mask & ENDIANNESS_MASK);
+	swap_fat_header((header = (struct fat_header *)ptr), is_be(mask));
+	swap_fat_arch(arch = (void *)ptr + sizeof(*header), header->nfat_arch, is_be(mask));
 	i = 0;
 	while (i < header->nfat_arch)
 	{
