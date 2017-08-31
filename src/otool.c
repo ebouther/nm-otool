@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 			disp_err(argv[i], "Permission denied.\n");
 			continue ;
 		}
-		nm_otool(fd, argv[i], argc > 2 ? 1 : 0, OTOOL);
+		nm_otool(fd, argv[i], DISP, OTOOL);
 
 		if (close(fd) == -1)
 			continue;

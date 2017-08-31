@@ -283,28 +283,34 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 	free_lists(sym_lst, sect_lst);
 }
 
-void	otool_section(void *seg, uint8_t arch_64, uint8_t b_endian, char *ptr)
+void	otool_section(void *seg, char *ptr, uint64_t mask)
 {
 	uint32_t				nsect;
 	char					*sectname;
 	void					*section;
 	uint8_t					n;
 
-	nsect = (arch_64 ? ((struct segment_command_64 *)seg)->nsects : ((struct segment_command *)seg)->nsects);
-	nsect = b_endian ? swap_uint32(nsect) : nsect;
+	nsect = (is_arch_64(mask) ? ((struct segment_command_64 *)seg)->nsects : ((struct segment_command *)seg)->nsects);
+	nsect = is_be(mask) ? swap_uint32(nsect) : nsect;
 	section = ((void *)seg +
-			(arch_64 ? sizeof(struct segment_command_64) : sizeof(struct segment_command)));
+			(is_arch_64(mask) ? sizeof(struct segment_command_64) : sizeof(struct segment_command)));
 	n = 0;
 	while (n < nsect)
 	{
-		sectname = (arch_64 ? ((struct section_64 *)section)[n].sectname : ((struct section *)section)[n].sectname);
+		sectname = (is_arch_64(mask) ? ((struct section_64 *)section)[n].sectname : ((struct section *)section)[n].sectname);
 
 		if (ft_strcmp(sectname, SECT_TEXT) == 0)
 		{
-			int offset = (arch_64 ? ((struct section_64 *)section)[n].offset : ((struct section *)section)[n].offset);
-			int size = (arch_64 ? ((struct section_64 *)section)[n].size : ((struct section *)section)[n].size);
-			uint64_t addr = (arch_64 ? ((struct section_64 *)section)[n].addr : ((struct section *)section)[n].addr);
-			hexdump(ptr + offset, size, addr);
+			uint64_t offset = (is_arch_64(mask) ? 
+					(is_be(mask) ? swap_uint64(((struct section_64 *)section)[n].offset) : ((struct section_64 *)section)[n].offset)
+					: (is_be(mask) ? swap_uint32(((struct section *)section)[n].offset) : ((struct section *)section)[n].offset));
+			uint64_t size = (is_arch_64(mask) ? 
+					(is_be(mask) ? swap_uint64(((struct section_64 *)section)[n].size) : ((struct section_64 *)section)[n].size)
+					: (is_be(mask) ? swap_uint32(((struct section *)section)[n].size) : ((struct section *)section)[n].size));
+			uint64_t addr = (is_arch_64(mask) ? 
+					(is_be(mask) ? swap_uint64(((struct section_64 *)section)[n].addr) : ((struct section_64 *)section)[n].addr)
+					: (is_be(mask) ? swap_uint32(((struct section *)section)[n].addr) : ((struct section *)section)[n].addr));
+			hexdump(ptr + offset, size, addr, mask);
 		}
 		n++;
 	}
@@ -321,12 +327,13 @@ void	otool_macho(char *f, char *ptr, uint8_t mask)
 	ncmds = is_be(mask) ? swap_uint32(header->ncmds) : header->ncmds;
 	swap_load_command(lc = (void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), is_be(mask));
 	i = 0;
-	if (f)
-		ft_printf("\n%s:\n", f);
+	if (is_disp(mask))
+		ft_printf("%s:\n", f);
+	ft_printf("Contents of (__TEXT,__text) section\n");
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
-			otool_section(lc, is_arch_64(mask), is_be(mask), ptr);
+			otool_section(lc, ptr, mask);
 		}
 		swap_load_command(lc = (void *)lc + lc->cmdsize, is_be(mask));
 		i++;
@@ -336,7 +343,7 @@ void	otool_macho(char *f, char *ptr, uint8_t mask)
 void	handle_macho(char *f, char *ptr, uint8_t mask)
 {
 	if (nm(mask))
-		nm_macho(f, ptr, mask);
+		nm_macho(is_hidden(mask) ? NULL : f, ptr, mask);
 	else
 		otool_macho(f, ptr, mask);
 }

@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/30 16:29:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/08/30 18:12:30 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/31 19:02:45 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ typedef struct 		s_sect
 */
 void 	disp_err(char *f, char *err);
 uint8_t	nm_otool(int fd, char *file, uint8_t disp, uint8_t mask);
-void 	handlers(char *f, uint8_t disp, char *ptr, uint8_t mask);
+void 	handlers(char *f, char *ptr, uint8_t mask);
 
 /*
 **  fat.c

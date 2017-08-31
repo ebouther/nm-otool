@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:32:57 by ebouther          #+#    #+#             */
-/*   Updated: 2017/08/31 18:08:14 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/08/31 18:25:59 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ void swap_fat_header(struct fat_header *fat_header, uint8_t b_endian)
 	fat_header->nfat_arch = swap_uint32(fat_header->nfat_arch);
 }
 
-#include "libft.h"
 void swap_load_command(struct load_command *lc, uint8_t b_endian)
 {
 	if (!b_endian)

@@ -18,7 +18,7 @@ void handle_ar(char *f, char *ptr)
 			filename_pad = ft_atoi(ar_header->ar_name + ft_strlen(AR_EFMT1));
 			filename = ar_header->ar_name + sizeof(struct ar_hdr);
 			ft_printf("\n%s(%s):\n", f, filename);
-			handlers(NULL, 0, (char *)ar_header + sizeof(struct ar_hdr) + filename_pad, 0);
+			handlers(NULL, (char *)ar_header + sizeof(struct ar_hdr) + filename_pad, 0);
 		} else {
 			filename = ar_header->ar_name;
 			int i = 0;
@@ -31,7 +31,7 @@ void handle_ar(char *f, char *ptr)
 				i++;
 			}
 			ft_printf("\n%s(%s):\n", f, filename);
-			handlers(NULL, 0, (char *)ar_header + sizeof(struct ar_hdr), 0);
+			handlers(NULL, (char *)ar_header + sizeof(struct ar_hdr), 0);
 		}
 	}
 }
