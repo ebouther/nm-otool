@@ -67,6 +67,6 @@ void handle_ar(char *f, char *ptr);
 /*
 **  macho.c
 */
-void	handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64);
+void	handle_macho(char *f, char *ptr, uint8_t mask);
 
 #endif

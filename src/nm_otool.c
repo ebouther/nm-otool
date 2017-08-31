@@ -6,11 +6,13 @@ void handlers(char *f, uint8_t disp, char *ptr, uint8_t mask)
 
 	magic_number = *(unsigned int *)ptr;
 	if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
-		handle_macho(disp ? f : NULL, ptr, (magic_number == MH_MAGIC) ? 0 : 1, 0);
+		handle_macho(disp ? f : NULL, ptr,
+			set_byte_sex(mask, (magic_number == MH_MAGIC) ? BE : LE) | set_arch_type(mask, 0));
 	else if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
-		handle_macho(disp ? f : NULL, ptr, (magic_number == MH_MAGIC_64) ? 0 : 1, 1);
+		handle_macho(disp ? f : NULL, ptr,
+			set_byte_sex(mask, (magic_number == MH_MAGIC_64) ? BE : LE) | set_arch_type(mask, 1));
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
-		handle_fat(f, ptr, mask | (((magic_number == FAT_MAGIC) ? LE : BE) << ENDIANNESS_MASK));
+		handle_fat(f, ptr, set_byte_sex(mask, (magic_number == FAT_MAGIC) ? BE : LE));
 	else if (magic_number == *((unsigned int *)ARMAG))
 		handle_ar(f, ptr);
 	else

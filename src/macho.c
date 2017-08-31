@@ -250,7 +250,7 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 }
 
 
-void	handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64)
+void	handle_macho(char *f, char *ptr, uint8_t mask)
 {
 	int							ncmds;
 	int							i;
@@ -266,27 +266,27 @@ void	handle_macho(char *f, char *ptr, uint8_t l_endian, uint8_t arch_64)
 	*sect_lst = NULL;
 
 	header = (struct mach_header *)ptr;
-	ncmds = l_endian ? swap_uint32(header->ncmds) : header->ncmds;
-	swap_load_command(lc = (void *)ptr + (arch_64 ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), l_endian);
+	ncmds = l_endian(mask) ? swap_uint32(header->ncmds) : header->ncmds;
+	swap_load_command(lc = (void *)ptr + (arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), l_endian(mask));
 	i = 0;
 	if (f)
 		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
-			add_sect_lst(lc, sect_lst, arch_64, l_endian, ptr);
+			add_sect_lst(lc, sect_lst, arch_64(mask), l_endian(mask), ptr);
 		}
 		else if (lc->cmd == LC_SYMTAB)
 		{
 			//printf("SYMTAB [%d]\n", i);
 			sym = (struct symtab_command *)lc;
 
-			add_symtab_lst(l_endian ? swap_uint32(sym->nsyms) : sym->nsyms,
-							l_endian ? swap_uint32(sym->symoff) : sym->symoff,
-							l_endian ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, arch_64, l_endian);
+			add_symtab_lst(l_endian(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
+							l_endian(mask) ? swap_uint32(sym->symoff) : sym->symoff,
+							l_endian(mask) ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, arch_64(mask), l_endian(mask));
 			//ft_printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
 		}
-		swap_load_command(lc = (void *)lc + lc->cmdsize, l_endian);
+		swap_load_command(lc = (void *)lc + lc->cmdsize, l_endian(mask));
 		i++;
 	}
 	sort_sym_lst(sym_lst);
