@@ -10,8 +10,9 @@
 # define BE 0x00
 # define LE 0x01
 
-# define set_byte_sex(mask, val) (mask | (val << ENDIANNESS_BIT))
-# define l_endian(mask) (mask & ENDIANNESS_MASK)
+# define le(mask) (mask | (1 << ENDIANNESS_BIT))
+# define be(mask) (mask & ~(1 << ENDIANNESS_BIT))
+# define is_le(mask) (mask & ENDIANNESS_MASK)
 
 
 # define ARCH_64_BIT 2 
@@ -19,8 +20,9 @@
 # define ARCH_32 0x00
 # define ARCH_64 0x01
 
-# define set_arch_type(mask, val) (mask | (val << ARCH_64_BIT))
-# define arch_64(mask) (mask & ARCH_64_MASK)
+# define arch_64(mask) (mask | (1 << ARCH_64_BIT))
+# define arch_32(mask) (mask & ~(1 << ARCH_64_BIT))
+# define is_arch_64(mask) (mask & ARCH_64_MASK)
 
 # define nm(mask) (mask & NM_OTOOL_MASK)
 

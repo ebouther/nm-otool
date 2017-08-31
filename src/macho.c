@@ -256,27 +256,27 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 	*sect_lst = NULL;
 
 	header = (struct mach_header *)ptr;
-	ncmds = l_endian(mask) ? swap_uint32(header->ncmds) : header->ncmds;
-	swap_load_command(lc = (void *)ptr + (arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), l_endian(mask));
+	ncmds = is_le(mask) ? swap_uint32(header->ncmds) : header->ncmds;
+	swap_load_command(lc = ((void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header))), is_le(mask));
 	i = 0;
 	if (f)
 		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
-			add_sect_lst(lc, sect_lst, arch_64(mask), l_endian(mask));
+			add_sect_lst(lc, sect_lst, is_arch_64(mask), is_le(mask));
 		}
 		else if (lc->cmd == LC_SYMTAB)
 		{
 			//printf("SYMTAB [%d]\n", i);
 			sym = (struct symtab_command *)lc;
 
-			add_symtab_lst(l_endian(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
-							l_endian(mask) ? swap_uint32(sym->symoff) : sym->symoff,
-							l_endian(mask) ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, arch_64(mask), l_endian(mask));
+			add_symtab_lst(is_le(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
+							is_le(mask) ? swap_uint32(sym->symoff) : sym->symoff,
+							is_le(mask) ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, is_arch_64(mask), is_le(mask));
 			//ft_printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
 		}
-		swap_load_command(lc = (void *)lc + lc->cmdsize, l_endian(mask));
+		swap_load_command(lc = (void *)lc + lc->cmdsize, is_le(mask));
 		i++;
 	}
 	sort_sym_lst(sym_lst);
@@ -319,17 +319,17 @@ void	otool_macho(char *f, char *ptr, uint8_t mask)
 	struct load_command			*lc;
 
 	header = (struct mach_header *)ptr;
-	ncmds = l_endian(mask) ? swap_uint32(header->ncmds) : header->ncmds;
-	swap_load_command(lc = (void *)ptr + (arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), l_endian(mask));
+	ncmds = is_le(mask) ? swap_uint32(header->ncmds) : header->ncmds;
+	swap_load_command(lc = (void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), is_le(mask));
 	i = 0;
 	if (f)
 		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
-			otool_section(lc, arch_64(mask), l_endian(mask), ptr);
+			otool_section(lc, is_arch_64(mask), is_le(mask), ptr);
 		}
-		swap_load_command(lc = (void *)lc + lc->cmdsize, l_endian(mask));
+		swap_load_command(lc = (void *)lc + lc->cmdsize, is_le(mask));
 		i++;
 	}
 }

@@ -1,25 +1,25 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   fat.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/08/31 14:29:50 by ebouther          #+#    #+#             */
+/*   Updated: 2017/08/31 15:59:16 by ebouther         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "nm_otool.h"
 
-void handle_fat(char *f, char *ptr, uint8_t mask)
+void	get_all_arch(char *f, char *ptr, uint8_t mask)
 {
-	uint32_t					i;
-	struct fat_header			*header;
-	struct fat_arch				*arch;
+	struct fat_arch		*arch;
+	struct fat_header	*header;
+	uint32_t			i;
 
-	swap_fat_header((header = (struct fat_header *)ptr), mask & ENDIANNESS_MASK);
-	swap_fat_arch(arch = (void *)ptr + sizeof(*header), header->nfat_arch, mask & ENDIANNESS_MASK);
 	i = 0;
-	while (i < header->nfat_arch)
-	{
-		if (arch->cputype == CPU_TYPE_X86_64)
-		{
-			handlers(f, 0, (void *)ptr + arch->offset, mask);
-			return;
-		}
-		arch = (void *)arch + sizeof(*arch);
-		i++;
-	}
-	i = 0;
+	header = (struct fat_header *)ptr;
 	arch = (void *)ptr + sizeof(*header);
 	while (i < header->nfat_arch)
 	{
@@ -31,4 +31,23 @@ void handle_fat(char *f, char *ptr, uint8_t mask)
 		arch = (void *)arch + sizeof(*arch);
 		i++;
 	}
+}
+
+void	handle_fat(char *f, char *ptr, uint8_t mask)
+{
+	uint32_t					i;
+	struct fat_header			*header;
+	struct fat_arch				*arch;
+
+	swap_fat_header((header = (struct fat_header *)ptr), mask & ENDIANNESS_MASK);
+	swap_fat_arch(arch = (void *)ptr + sizeof(*header), header->nfat_arch, mask & ENDIANNESS_MASK);
+	i = 0;
+	while (i < header->nfat_arch)
+	{
+		if (arch->cputype == CPU_TYPE_X86_64)
+			return handlers(f, 0, (void *)ptr + arch->offset, mask);
+		arch = (void *)arch + sizeof(*arch);
+		i++;
+	}
+	get_all_arch(f, ptr, mask);
 }

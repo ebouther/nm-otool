@@ -7,17 +7,16 @@ void handlers(char *f, uint8_t disp, char *ptr, uint8_t mask)
 	magic_number = *(unsigned int *)ptr;
 	if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
 		handle_macho(disp ? f : NULL, ptr,
-			set_byte_sex(mask, (magic_number == MH_MAGIC) ? BE : LE) | set_arch_type(mask, 0));
+			arch_32((magic_number == MH_MAGIC) ? be(mask) : le(mask)));
 	else if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
 		handle_macho(disp ? f : NULL, ptr,
-			set_byte_sex(mask, (magic_number == MH_MAGIC_64) ? BE : LE) | set_arch_type(mask, 1));
+			arch_64((magic_number == MH_MAGIC) ? be(mask) : le(mask)));
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
-		handle_fat(f, ptr, set_byte_sex(mask, (magic_number == FAT_MAGIC) ? BE : LE));
+		handle_fat(f, ptr, (magic_number == FAT_MAGIC) ? be(mask) : le(mask));
 	else if (magic_number == *((unsigned int *)ARMAG))
 		handle_ar(f, ptr);
 	else
 		disp_err(f, " The file was not recognized as a valid object file.\n");
-		//ft_printf("MAGIC NUMBER : %x\n", magic_number);
 }
 
 uint8_t	nm_otool(int fd, char *file, uint8_t disp, uint8_t mask)
