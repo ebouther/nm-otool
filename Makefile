@@ -69,7 +69,7 @@ norme: $(SRC)
 $(FT_NM): $(OBJ) $(NM_OBJ)
 	$(CC) -o $@ $^ $(LFLAGS)
 
-$(FT_OTOOL): $(OBJ) $(NM_OBJ)
+$(FT_OTOOL): $(OBJ) $(OTOOL_OBJ)
 	$(CC) -o $@ $^ $(LFLAGS)
 
 $(LIBFT):
@@ -83,6 +83,6 @@ clean:
 	rm -rf $(OBJ_DIR)
 
 fclean: clean
-	rm -f $(FT_NM) $(LIBFT)
+	rm -f $(FT_NM) $(FT_OTOOL) $(LIBFT)
 
 re: fclean all

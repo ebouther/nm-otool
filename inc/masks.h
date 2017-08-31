@@ -2,8 +2,8 @@
 # define MASKS_H
 
 # define NM_OTOOL_MASK 0x01
-# define NM 0x00
-# define OTOOL 0x01
+# define OTOOL 0x00
+# define NM 0x01
 
 # define ENDIANNESS_BIT 1 
 # define ENDIANNESS_MASK 0x02
@@ -21,5 +21,7 @@
 
 # define set_arch_type(mask, val) (mask | (val << ARCH_64_BIT))
 # define arch_64(mask) (mask & ARCH_64_MASK)
+
+# define nm(mask) (mask & NM_OTOOL_MASK)
 
 #endif
