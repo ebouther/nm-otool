@@ -1,9 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   macho.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/09/04 16:01:37 by ebouther          #+#    #+#             */
+/*   Updated: 2017/09/04 17:55:33 by ebouther         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "nm_otool.h"
 
-void free_lists(t_sym **sym_lst, t_sect **sect_lst)
+void	free_lists(t_sym **sym_lst, t_sect **sect_lst)
 {
-	t_sym *lst;
-	t_sect *s_lst;
+	t_sym	*lst;
+	t_sect	*s_lst;
 	void	*tmp;
 
 	lst = *sym_lst;
@@ -13,7 +25,6 @@ void free_lists(t_sym **sym_lst, t_sect **sect_lst)
 		lst = lst->next;
 		free(tmp);
 	}
-
 	s_lst = *sect_lst;
 	while (s_lst)
 	{
@@ -25,7 +36,7 @@ void free_lists(t_sym **sym_lst, t_sect **sect_lst)
 	free(sect_lst);
 }
 
-void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
+void	disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 {
 	t_sect	*begin;
 	int		i;
@@ -33,54 +44,49 @@ void disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 	begin = sect_lst;
 	while (lst)
 	{
-		    //ft_printf("SYMBOL 2 [%x] [%s] [%d]\n", (unsigned int)lst, lst->name, lst->n_sect);
-			sect_lst = begin;
-			if (lst->n_sect && sect_lst
-				&& (lst->type == 'T' || lst->type == 't')
-				&& lst->n_sect != NO_SECT)
+		sect_lst = begin;
+		if (lst->n_sect && sect_lst
+			&& (lst->type == 'T' || lst->type == 't')
+			&& lst->n_sect != NO_SECT)
+		{
+			i = 1;
+			while (sect_lst)
 			{
-				i = 1;
-				while (sect_lst)
-				{
-					if (i >= lst->n_sect)
-						break;
-					sect_lst = sect_lst->next;
-					i++;
-				}
-				if (i == lst->n_sect)
-				{
-					lst->type = sect_lst->section +
-						((lst->type == 't') ? 32 : 0);
-				}
+				if (i >= lst->n_sect)
+					break ;
+				sect_lst = sect_lst->next;
+				i++;
 			}
-			//ft_printf("ARCH64 : %d\n", lst->arch_64);
-			if (lst->type != 'U')
-				ft_printf(lst->arch_64 ? "%016llx" : "%08llx", lst->value);
-			else
-				ft_printf(lst->arch_64 ? "                " : "        ");
-			ft_printf(" %c", lst->type);
-			//ft_printf(" %d", lst->n_sect); // DBG
-			ft_printf(" %s\n", lst->name);
-			//ft_printf(" N_SECT : %d\n", lst->n_sect);
-		
+			if (i == lst->n_sect)
+			{
+				lst->type = sect_lst->section +
+					((lst->type == 't') ? 32 : 0);
+			}
+		}
+		if (lst->type != 'U')
+			ft_printf(lst->arch_64 ? "%016llx" : "%08llx", lst->value);
+		else
+			ft_printf(lst->arch_64 ? "                " : "        ");
+		ft_printf(" %c", lst->type);
+		ft_printf(" %s\n", lst->name);
 		lst = lst->next;
 	}
 }
 
-void sort_sym_lst(t_sym **lst)
+void	sort_sym_lst(t_sym **lst)
 {
 	uint8_t	sorted;
 	t_sym	*sym;
 	t_sym	tmp;
 	int		diff;
-   
+
 	sorted = 0;
 	if (!lst)
-		return;
+		return ;
 	while (!sorted)
 	{
 		sorted = 1;
-		sym	= *lst;
+		sym = *lst;
 		while (sym && sym->next)
 		{
 			if ((diff = ft_strcmp(sym->name, sym->next->name)) > 0
@@ -124,10 +130,8 @@ void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t b_endia
 		sect = sect->next;
 	}
 	sect = last_node;
-	//ft_printf("SEGNAME : %s\n", seg->segname);
 	while (n < nsect)
 	{
-		//ft_printf("SECTION (%d) \n", n);
 		if (sect == NULL)
 		{
 			sect = (t_sect *)malloc(sizeof(t_sect));
@@ -138,22 +142,14 @@ void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t b_endia
 			sect->next = (t_sect *)malloc(sizeof(t_sect));
 			sect = sect->next;
 		}
-
 		*sect = (t_sect){'S', NULL};
-		sectname = (arch_64 ? ((struct section_64 *)section)[n].sectname : ((struct section *)section)[n].sectname);
-
-		if (ft_strcmp(sectname, SECT_TEXT) == 0) //&&
-			   //strcmp(section[n].segname, SEG_TEXT) == 0)
+		sectname = (arch_64 ? ((struct section_64 *)section)->sectname : ((struct section *)section)[n].sectname);
+		if (ft_strcmp(sectname, SECT_TEXT) == 0)
 			sect->section = 'T';
-		else if (ft_strcmp(sectname, SECT_DATA) == 0) //&&
-			//strcmp(section[n].segname, SEG_DATA) == 0)
+		else if (ft_strcmp(sectname, SECT_DATA) == 0)
 			sect->section = 'D';
-		else if (ft_strcmp(sectname, SECT_BSS) == 0) //&&
-			//strcmp(section[n].segname, SEG_DATA) == 0)
+		else if (ft_strcmp(sectname, SECT_BSS) == 0) 
 			sect->section = 'B';
-		//else if (strcmp(section[n].sectname, SECT_COMMON) == 0) //&&
-		//	//strcmp(section[n].segname, SEG_DATA) == 0)
-		//	sect->section = 'C';
 		n++;
 	}
 }
@@ -167,7 +163,6 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 	t_sym			*last_node;
 
 	i = 0;
-	//ft_printf("STROFF %d\n", stroff);
 	stringtable = (void *)ptr + stroff;
 	sym = *sym_lst;
 	last_node = NULL;
@@ -200,29 +195,16 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 				sym->next = (t_sym *)malloc(sizeof(t_sym));
 				sym = sym->next;
 			}
-
-			//ft_printf("SYM: %s\n", stringtable + el->n_un.n_strx);
 			*sym = (t_sym){arch_64, arch_64 ?
 				(b_endian ? swap_uint64(el->n_value) : el->n_value)
 				: (b_endian ? (uint64_t)swap_uint32(((struct nlist *)el)->n_value) : ((struct nlist *)el)->n_value), 
 				'?', el->n_sect, stringtable + el->n_un.n_strx, NULL};
-
-
-			//if ((el->n_type & N_PEXT))
-			//	ft_printf("N_PEXT\n");
-		    //ft_printf("SYMBOL [%x] [%s] [%d]\n", (unsigned int)sym,stringtable + el->n_un.n_strx, el->n_sect);
-
 			if ((el->n_type & N_TYPE) == N_UNDF)
-			{
 				sym->type = (el->n_sect == NO_SECT) ? 'U' : 'C';
-			}
 			else if ((el->n_type & N_TYPE) == N_ABS)
 				sym->type = 'A';
 			else if ((el->n_type & N_TYPE) == N_SECT)
-			{
 				sym->type = 'T';
-				//sym->n_sect = el->n_sect;
-			}
 			else if ((el->n_type & N_TYPE) == N_PBUD)
 				sym->type = 'U';
 			else if ((el->n_type & N_TYPE) == N_INDR)
@@ -233,7 +215,6 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 					&& sym->type >= 'A'
 					&& sym->type <= 'Z')
 				sym->type += 32;
-				
 		}
 		i++;
 	}
@@ -267,13 +248,11 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 		}
 		else if (lc->cmd == LC_SYMTAB)
 		{
-			//printf("SYMTAB [%d]\n", i);
 			sym = (struct symtab_command *)lc;
 
 			add_symtab_lst(is_be(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
 							is_be(mask) ? swap_uint32(sym->symoff) : sym->symoff,
 							is_be(mask) ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, is_arch_64(mask), is_be(mask));
-			//ft_printf("LST ADDR: %#x\n", (unsigned int)sym_lst);
 		}
 		swap_load_command(lc = (void *)lc + lc->cmdsize, is_be(mask));
 		i++;
@@ -283,35 +262,56 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 	free_lists(sym_lst, sect_lst);
 }
 
-void	otool_section(void *seg, char *ptr, uint64_t mask)
+void disp_txt_section(void *ptr, void *section, uint8_t mask)
+{
+	uint64_t	offset;
+	uint64_t	size;
+	uint64_t	addr;
+
+	offset = (is_arch_64(mask) ? 
+		(is_be(mask) ?
+			 swap_uint64(((struct section_64 *)section)->offset)
+			 : ((struct section_64 *)section)->offset)
+		: (is_be(mask) ?
+			swap_uint32(((struct section *)section)->offset)
+			: ((struct section *)section)->offset));
+	size = (is_arch_64(mask) ? 
+		(is_be(mask) ?
+			 swap_uint64(((struct section_64 *)section)->size)
+			 : ((struct section_64 *)section)->size)
+		: (is_be(mask) ?
+			swap_uint32(((struct section *)section)->size)
+			: ((struct section *)section)->size));
+	addr = (is_arch_64(mask) ? 
+			(is_be(mask) ? swap_uint64(((struct section_64 *)section)->addr)
+			 : ((struct section_64 *)section)->addr)
+			: (is_be(mask) ? swap_uint32(((struct section *)section)->addr)
+				: ((struct section *)section)->addr));
+	hexdump(ptr + offset, size, addr, mask);
+}
+
+void	otool_section(void *seg, char *ptr, uint8_t mask)
 {
 	uint32_t				nsect;
 	char					*sectname;
 	void					*section;
 	uint8_t					n;
 
-	nsect = (is_arch_64(mask) ? ((struct segment_command_64 *)seg)->nsects : ((struct segment_command *)seg)->nsects);
+	nsect = (is_arch_64(mask) ? ((struct segment_command_64 *)seg)->nsects
+			: ((struct segment_command *)seg)->nsects);
 	nsect = is_be(mask) ? swap_uint32(nsect) : nsect;
 	section = ((void *)seg +
-			(is_arch_64(mask) ? sizeof(struct segment_command_64) : sizeof(struct segment_command)));
+			(is_arch_64(mask) ? sizeof(struct segment_command_64)
+			 : sizeof(struct segment_command)));
 	n = 0;
 	while (n < nsect)
 	{
-		sectname = (is_arch_64(mask) ? ((struct section_64 *)section)[n].sectname : ((struct section *)section)[n].sectname);
+		sectname =
+			(is_arch_64(mask) ? ((struct section_64 *)section)->sectname
+			 : ((struct section *)section)->sectname);
 
 		if (ft_strcmp(sectname, SECT_TEXT) == 0)
-		{
-			uint64_t offset = (is_arch_64(mask) ? 
-					(is_be(mask) ? swap_uint64(((struct section_64 *)section)[n].offset) : ((struct section_64 *)section)[n].offset)
-					: (is_be(mask) ? swap_uint32(((struct section *)section)[n].offset) : ((struct section *)section)[n].offset));
-			uint64_t size = (is_arch_64(mask) ? 
-					(is_be(mask) ? swap_uint64(((struct section_64 *)section)[n].size) : ((struct section_64 *)section)[n].size)
-					: (is_be(mask) ? swap_uint32(((struct section *)section)[n].size) : ((struct section *)section)[n].size));
-			uint64_t addr = (is_arch_64(mask) ? 
-					(is_be(mask) ? swap_uint64(((struct section_64 *)section)[n].addr) : ((struct section_64 *)section)[n].addr)
-					: (is_be(mask) ? swap_uint32(((struct section *)section)[n].addr) : ((struct section *)section)[n].addr));
-			hexdump(ptr + offset, size, addr, mask);
-		}
+			disp_txt_section(ptr, &(section[n]), mask);
 		n++;
 	}
 }
