@@ -6,15 +6,15 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:41 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/04 16:01:41 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/05 20:01:41 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "nm.h"
 
-int main(int argc, char **argv)
+int	main(int argc, char **argv)
 {
-	int 		fd;
+	int			fd;
 	int			i;
 	char		*file;
 
@@ -34,7 +34,6 @@ int main(int argc, char **argv)
 			continue ;
 		}
 		nm_otool(fd, file, argc > 2 ? 1 : 0, NM);
-
 		if (close(fd) == -1)
 			continue;
 	}

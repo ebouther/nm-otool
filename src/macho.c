@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:37 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/04 17:55:33 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/05 19:58:00 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 void	free_lists(t_sym **sym_lst, t_sect **sect_lst)
 {
-	t_sym	*lst;
-	t_sect	*s_lst;
-	void	*tmp;
+	t_sym		*lst;
+	t_sect		*s_lst;
+	void		*tmp;
 
 	lst = *sym_lst;
 	while (lst)
@@ -108,7 +108,8 @@ void	sort_sym_lst(t_sym **lst)
 	}
 }
 
-void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t b_endian)
+void	add_sect_lst(void *seg, t_sect **sect_lst,
+					uint8_t arch_64, uint8_t b_endian)
 {
 	uint32_t				nsect;
 	char					*sectname;
@@ -117,10 +118,12 @@ void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t b_endia
 	t_sect					*sect;
 	t_sect					*last_node;
 
-	nsect = (arch_64 ? ((struct segment_command_64 *)seg)->nsects : ((struct segment_command *)seg)->nsects);
+	nsect = (arch_64 ? ((struct segment_command_64 *)seg)->nsects
+			: ((struct segment_command *)seg)->nsects);
 	nsect = b_endian ? swap_uint32(nsect) : nsect;
 	section = ((void *)seg +
-			(arch_64 ? sizeof(struct segment_command_64) : sizeof(struct segment_command)));
+			(arch_64 ? sizeof(struct segment_command_64)
+			 : sizeof(struct segment_command)));
 	n = 0;
 	sect = *sect_lst;
 	last_node = NULL;
@@ -143,18 +146,20 @@ void	add_sect_lst(void *seg, t_sect **sect_lst, uint8_t arch_64, uint8_t b_endia
 			sect = sect->next;
 		}
 		*sect = (t_sect){'S', NULL};
-		sectname = (arch_64 ? ((struct section_64 *)section)->sectname : ((struct section *)section)[n].sectname);
+		sectname = (arch_64 ? ((struct section_64 *)section)->sectname
+				: ((struct section *)section)[n].sectname);
 		if (ft_strcmp(sectname, SECT_TEXT) == 0)
 			sect->section = 'T';
 		else if (ft_strcmp(sectname, SECT_DATA) == 0)
 			sect->section = 'D';
-		else if (ft_strcmp(sectname, SECT_BSS) == 0) 
+		else if (ft_strcmp(sectname, SECT_BSS) == 0)
 			sect->section = 'B';
 		n++;
 	}
 }
 
-void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_lst, uint8_t arch_64, uint8_t b_endian)
+void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr,
+						t_sym **sym_lst, uint8_t arch_64, uint8_t b_endian)
 {
 	int				i;
 	char			*stringtable;
@@ -174,14 +179,11 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr, t_sym **sym_ls
 	sym = last_node;
 	while (i < nsyms)
 	{
-		el = (void *)ptr + symoff + (i * (arch_64 ? sizeof(struct nlist_64) : sizeof(struct nlist)));
+		el = (void *)ptr + symoff +
+			(i * (arch_64 ? sizeof(struct nlist_64) : sizeof(struct nlist)));
 		el->n_un.n_strx =
-			b_endian ? 
-			swap_uint32(el->n_un.n_strx)
-			: el->n_un.n_strx;
-
+			b_endian ? swap_uint32(el->n_un.n_strx) : el->n_un.n_strx;
 		el->n_desc = b_endian ? swap_uint16(el->n_desc) : el->n_desc;
-
 		if (ft_strlen(stringtable + el->n_un.n_strx) > 0
 			&& !(el->n_type & N_STAB))
 		{
@@ -236,25 +238,26 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 	*sect_lst = NULL;
 
 	header = (struct mach_header *)ptr;
-	ncmds = is_be(mask) ? swap_uint32(header->ncmds) : header->ncmds;
-	swap_load_command(lc = ((void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header))), is_be(mask));
+	ncmds = IS_BE(mask) ? swap_uint32(header->ncmds) : header->ncmds;
+	swap_load_command(lc = ((void *)ptr +
+		(IS_ARCH_64(mask) ? sizeof(struct mach_header_64)
+		 : sizeof(struct mach_header))), IS_BE(mask));
 	i = 0;
 	if (f)
 		ft_printf("\n%s:\n", f);
 	while (i < ncmds)
 	{
-		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
-			add_sect_lst(lc, sect_lst, is_arch_64(mask), is_be(mask));
-		}
+		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT)
+			add_sect_lst(lc, sect_lst, IS_ARCH_64(mask), IS_BE(mask));
 		else if (lc->cmd == LC_SYMTAB)
 		{
 			sym = (struct symtab_command *)lc;
-
-			add_symtab_lst(is_be(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
-							is_be(mask) ? swap_uint32(sym->symoff) : sym->symoff,
-							is_be(mask) ? swap_uint32(sym->stroff) : sym->stroff, ptr, sym_lst, is_arch_64(mask), is_be(mask));
+			add_symtab_lst(IS_BE(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
+				IS_BE(mask) ? swap_uint32(sym->symoff) : sym->symoff,
+				IS_BE(mask) ? swap_uint32(sym->stroff) : sym->stroff,
+				ptr, sym_lst, IS_ARCH_64(mask), IS_BE(mask));
 		}
-		swap_load_command(lc = (void *)lc + lc->cmdsize, is_be(mask));
+		swap_load_command(lc = (void *)lc + lc->cmdsize, IS_BE(mask));
 		i++;
 	}
 	sort_sym_lst(sym_lst);
@@ -268,25 +271,25 @@ void disp_txt_section(void *ptr, void *section, uint8_t mask)
 	uint64_t	size;
 	uint64_t	addr;
 
-	offset = (is_arch_64(mask) ? 
-		(is_be(mask) ?
+	offset = (IS_ARCH_64(mask) ?
+		(IS_BE(mask) ?
 			 swap_uint64(((struct section_64 *)section)->offset)
-			 : ((struct section_64 *)section)->offset)
-		: (is_be(mask) ?
+			: ((struct section_64 *)section)->offset)
+		: (IS_BE(mask) ?
 			swap_uint32(((struct section *)section)->offset)
 			: ((struct section *)section)->offset));
-	size = (is_arch_64(mask) ? 
-		(is_be(mask) ?
-			 swap_uint64(((struct section_64 *)section)->size)
-			 : ((struct section_64 *)section)->size)
-		: (is_be(mask) ?
+	size = (IS_ARCH_64(mask) ?
+		(IS_BE(mask) ?
+			swap_uint64(((struct section_64 *)section)->size)
+			: ((struct section_64 *)section)->size)
+		: (IS_BE(mask) ?
 			swap_uint32(((struct section *)section)->size)
 			: ((struct section *)section)->size));
-	addr = (is_arch_64(mask) ? 
-			(is_be(mask) ? swap_uint64(((struct section_64 *)section)->addr)
-			 : ((struct section_64 *)section)->addr)
-			: (is_be(mask) ? swap_uint32(((struct section *)section)->addr)
-				: ((struct section *)section)->addr));
+	addr = (IS_ARCH_64(mask) ?
+			(IS_BE(mask) ? swap_uint64(((struct section_64 *)section)->addr)
+			: ((struct section_64 *)section)->addr)
+			: (IS_BE(mask) ? swap_uint32(((struct section *)section)->addr)
+			: ((struct section *)section)->addr));
 	hexdump(ptr + offset, size, addr, mask);
 }
 
@@ -297,19 +300,18 @@ void	otool_section(void *seg, char *ptr, uint8_t mask)
 	void					*section;
 	uint8_t					n;
 
-	nsect = (is_arch_64(mask) ? ((struct segment_command_64 *)seg)->nsects
+	nsect = (IS_ARCH_64(mask) ? ((struct segment_command_64 *)seg)->nsects
 			: ((struct segment_command *)seg)->nsects);
-	nsect = is_be(mask) ? swap_uint32(nsect) : nsect;
+	nsect = IS_BE(mask) ? swap_uint32(nsect) : nsect;
 	section = ((void *)seg +
-			(is_arch_64(mask) ? sizeof(struct segment_command_64)
-			 : sizeof(struct segment_command)));
+			(IS_ARCH_64(mask) ? sizeof(struct segment_command_64)
+			: sizeof(struct segment_command)));
 	n = 0;
 	while (n < nsect)
 	{
 		sectname =
-			(is_arch_64(mask) ? ((struct section_64 *)section)->sectname
-			 : ((struct section *)section)->sectname);
-
+			(IS_ARCH_64(mask) ? ((struct section_64 *)section)->sectname
+			: ((struct section *)section)->sectname);
 		if (ft_strcmp(sectname, SECT_TEXT) == 0)
 			disp_txt_section(ptr, &(section[n]), mask);
 		n++;
@@ -320,30 +322,31 @@ void	otool_macho(char *f, char *ptr, uint8_t mask)
 {
 	int							ncmds;
 	int							i;
-	struct mach_header 			*header;
+	struct mach_header			*header;
 	struct load_command			*lc;
 
 	header = (struct mach_header *)ptr;
-	ncmds = is_be(mask) ? swap_uint32(header->ncmds) : header->ncmds;
-	swap_load_command(lc = (void *)ptr + (is_arch_64(mask) ? sizeof(struct mach_header_64) : sizeof(struct mach_header)), is_be(mask));
+	ncmds = IS_BE(mask) ? swap_uint32(header->ncmds) : header->ncmds;
+	swap_load_command(lc = (void *)ptr + (IS_ARCH_64(mask) ?
+		sizeof(struct mach_header_64)
+		: sizeof(struct mach_header)), IS_BE(mask));
 	i = 0;
-	if (is_disp(mask))
+	if (IS_DISP(mask))
 		ft_printf("%s:\n", f);
 	ft_printf("Contents of (__TEXT,__text) section\n");
 	while (i < ncmds)
 	{
-		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT) {
+		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT)
 			otool_section(lc, ptr, mask);
-		}
-		swap_load_command(lc = (void *)lc + lc->cmdsize, is_be(mask));
+		swap_load_command(lc = (void *)lc + lc->cmdsize, IS_BE(mask));
 		i++;
 	}
 }
 
 void	handle_macho(char *f, char *ptr, uint8_t mask)
 {
-	if (nm(mask))
-		nm_macho(is_hidden(mask) ? NULL : f, ptr, mask);
+	if (IS_NM(mask))
+		nm_macho(IS_HIDDEN(mask) ? NULL : f, ptr, mask);
 	else
 		otool_macho(f, ptr, mask);
 }

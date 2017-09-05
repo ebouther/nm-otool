@@ -1,13 +1,25 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/09/05 20:02:06 by ebouther          #+#    #+#             */
+/*   Updated: 2017/09/05 20:02:37 by ebouther         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "utils.h"
 
-void disp_err(char *f, char *err)
+void	disp_err(char *f, char *err)
 {
 	ft_putstr_fd("nm: ", 2);
 	ft_putstr_fd(f, 2);
 	ft_putstr_fd(err, 2);
 }
 
-void hexdump(void *data, size_t size, uint64_t addr, uint8_t mask)
+void	hexdump(void *data, size_t size, uint64_t addr, uint8_t mask)
 {
 	size_t i;
 	size_t j;
@@ -15,13 +27,14 @@ void hexdump(void *data, size_t size, uint64_t addr, uint8_t mask)
 	i = 0;
 	while (i < size)
 	{
-		is_arch_64(mask) ? ft_printf("%016llx\t", addr + i) : ft_printf("%08llx\t", addr + i);
+		IS_ARCH_64(mask) ? ft_printf("%016llx\t", addr + i)
+			: ft_printf("%08llx\t", addr + i);
 		j = 0;
 		while (j < 16
 				&& i + j < size)
 		{
 			ft_printf("%02x", ((uint8_t *)data)[i + j++]);
-			if (is_dump_1(mask) || (is_dump_4(mask) && j % 4 == 0))
+			if (IS_DUMP_1(mask) || (IS_DUMP_4(mask) && j % 4 == 0))
 				ft_putchar(' ');
 		}
 		ft_putchar('\n');
