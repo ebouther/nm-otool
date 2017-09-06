@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:37 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/05 19:58:00 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/06 15:34:31 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ void	add_sect_lst(void *seg, t_sect **sect_lst,
 			sect = sect->next;
 		}
 		*sect = (t_sect){'S', NULL};
-		sectname = (arch_64 ? ((struct section_64 *)section)->sectname
+		sectname = (arch_64 ? ((struct section_64 *)section)[n].sectname
 				: ((struct section *)section)[n].sectname);
 		if (ft_strcmp(sectname, SECT_TEXT) == 0)
 			sect->section = 'T';
