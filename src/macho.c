@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:37 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/06 15:34:31 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/06 16:06:56 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,7 +313,10 @@ void	otool_section(void *seg, char *ptr, uint8_t mask)
 			(IS_ARCH_64(mask) ? ((struct section_64 *)section)->sectname
 			: ((struct section *)section)->sectname);
 		if (ft_strcmp(sectname, SECT_TEXT) == 0)
+		{
 			disp_txt_section(ptr, &(section[n]), mask);
+			break ;
+		}
 		n++;
 	}
 }

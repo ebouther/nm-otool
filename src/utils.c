@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/05 20:02:06 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/05 20:02:37 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/06 16:07:21 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void	hexdump(void *data, size_t size, uint64_t addr, uint8_t mask)
 				ft_putchar(' ');
 		}
 		ft_putchar('\n');
-		i += 16;
+		if ((i += 16) >= size)
+			break ;
 	}
 }

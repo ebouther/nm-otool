@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/31 14:29:50 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/06 15:38:21 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/06 16:02:47 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,8 @@ void	handle_fat(char *f, char *ptr, uint8_t mask)
 	while (i < header->nfat_arch)
 	{
 		if (arch->cputype == CPU_TYPE_X86_64)
-			return (handlers(f, (void *)ptr + arch->offset, IS_NM(mask) ? SET_HIDE(mask) : SET_DISP(mask)));
+			return (handlers(f, (void *)ptr + arch->offset,
+						IS_NM(mask) ? SET_HIDE(mask) : SET_DISP(mask)));
 		arch = (void *)arch + sizeof(*arch);
 		i++;
 	}
