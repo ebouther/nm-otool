@@ -6,15 +6,16 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/05 20:02:06 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/06 16:07:21 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/08 11:59:55 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 
-void	disp_err(char *f, char *err)
+void	disp_err(char *bin, char *f, char *err)
 {
-	ft_putstr_fd("nm: ", 2);
+	ft_putstr_fd(bin, 2);
+	ft_putstr_fd(": ", 2);
 	ft_putstr_fd(f, 2);
 	ft_putstr_fd(err, 2);
 }

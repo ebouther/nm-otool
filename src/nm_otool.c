@@ -6,13 +6,13 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:24 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/05 19:55:57 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/08 12:03:49 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "nm_otool.h"
 
-void		handlers(char *f, char *ptr, uint8_t mask)
+uint8_t		handlers(char *f, char *ptr, uint8_t mask)
 {
 	unsigned int	magic_number;
 
@@ -28,21 +28,26 @@ void		handlers(char *f, char *ptr, uint8_t mask)
 	else if (magic_number == *((unsigned int *)ARMAG))
 		handle_ar(f, ptr);
 	else
-		disp_err(f, " The file was not recognized as a valid object file.\n");
+	{
+		disp_err(IS_NM(mask) ? "ft_nm" : "ft_otool", f, " The file was not recognized as a valid object file.\n");
+		return (EXIT_FAILURE);
+	}
+	return (EXIT_SUCCESS);
 }
 
 uint8_t		nm_otool(int fd, char *file, uint8_t disp, uint8_t mask)
 {
 	char		*ptr;
 	struct stat	buf;
+	uint8_t		ret;
 
 	if (fstat(fd, &buf) < 0)
-		return (-1);
+		return (EXIT_FAILURE);
 	if ((ptr = mmap(0, buf.st_size,
 			PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-		return (-1);
-	handlers(file, ptr, disp ? SET_DISP(mask) : mask);
+		return (EXIT_FAILURE);
+	ret = handlers(file, ptr, disp ? SET_DISP(mask) : mask);
 	if (munmap(ptr, buf.st_size) < 0)
-		return (-1);
-	return (0);
+		return (EXIT_FAILURE);
+	return (ret);
 }

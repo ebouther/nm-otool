@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:41 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/05 20:01:41 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/08 12:00:46 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ int	main(int argc, char **argv)
 	int			fd;
 	int			i;
 	char		*file;
+	uint8_t		ret;
 
 	i = 0;
 	while (++i < argc || argc == 1)
@@ -30,12 +31,12 @@ int	main(int argc, char **argv)
 			file = argv[i];
 		if ((fd = open(file, O_RDONLY)) < 0)
 		{
-			disp_err(file, "Permission denied.\n");
-			continue ;
+			disp_err(argv[0], file, ": No such file or directory.\n");
+			return (EXIT_FAILURE);
 		}
-		nm_otool(fd, file, argc > 2 ? 1 : 0, NM);
+		ret = nm_otool(fd, file, argc > 2 ? 1 : 0, NM);
 		if (close(fd) == -1)
-			continue;
+			return (EXIT_FAILURE);
 	}
-	return (0);
+	return (ret);
 }
