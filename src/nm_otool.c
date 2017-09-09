@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:24 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/09 12:14:46 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/09 18:45:17 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,23 +19,27 @@ uint8_t		handlers(char *f, char *ptr, uint8_t mask)
 	magic_number = *(unsigned int *)ptr;
 	if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
 		handle_macho(f, ptr,
-			SET_ARCH_32(((magic_number == MH_MAGIC) ? SET_LE(mask) : SET_BE(mask))));
+			SET_ARCH_32(((magic_number == MH_MAGIC) ?
+					SET_LE(mask) : SET_BE(mask))));
 	else if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
 		handle_macho(f, ptr,
-			SET_ARCH_64(((magic_number == MH_MAGIC_64) ? SET_LE(mask) : SET_BE(mask))));
+			SET_ARCH_64(((magic_number == MH_MAGIC_64) ?
+					SET_LE(mask) : SET_BE(mask))));
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
-		handle_fat(f, ptr, (magic_number == FAT_MAGIC) ? SET_LE(mask) : SET_BE(mask));
+		handle_fat(f, ptr, (magic_number == FAT_MAGIC)
+				? SET_LE(mask) : SET_BE(mask));
 	else if (magic_number == *((unsigned int *)ARMAG))
 		handle_ar(f, ptr, mask);
 	else
 	{
-		disp_err(IS_NM(mask) ? "ft_nm" : "ft_otool", f, " The file was not recognized as a valid object file.\n");
+		disp_err(IS_NM(mask) ? "ft_nm" : "ft_otool", f,
+			" The file was not recognized as a valid object file.\n");
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);
 }
 
-uint8_t		nm_otool(int fd, char *file, uint8_t disp, uint8_t mask)
+uint8_t		nm_otool(int fd, char *file, uint8_t mask)
 {
 	char		*ptr;
 	struct stat	buf;
@@ -46,7 +50,7 @@ uint8_t		nm_otool(int fd, char *file, uint8_t disp, uint8_t mask)
 	if ((ptr = mmap(0, buf.st_size,
 			PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 		return (EXIT_FAILURE);
-	ret = handlers(file, ptr, disp ? SET_DISP(mask) : mask);
+	ret = handlers(file, ptr, mask);
 	if (munmap(ptr, buf.st_size) < 0)
 		return (EXIT_FAILURE);
 	return (ret);

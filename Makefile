@@ -19,6 +19,7 @@ SRC_FILES =	ar.c \
 			fat.c \
 			macho.c \
 			nm_otool.c \
+			symbols.c \
 			swap.c \
 			utils.c
 
@@ -27,6 +28,7 @@ OBJ_FILES = $(SRC_FILES:.c=.o)
 
 INC_FILES = masks.h \
 			nm_otool.h \
+			symbols.h \
 			swap.h \
 			utils.h \
 			nm.h
