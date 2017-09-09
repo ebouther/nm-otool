@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:37 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/06 16:06:56 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/09 12:26:43 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ void	add_sect_lst(void *seg, t_sect **sect_lst,
 {
 	uint32_t				nsect;
 	char					*sectname;
+	char					*segname;
 	void					*section;
 	uint8_t					n;
 	t_sect					*sect;
@@ -148,6 +149,8 @@ void	add_sect_lst(void *seg, t_sect **sect_lst,
 		*sect = (t_sect){'S', NULL};
 		sectname = (arch_64 ? ((struct section_64 *)section)[n].sectname
 				: ((struct section *)section)[n].sectname);
+		segname = (arch_64 ? ((struct section_64 *)section)[n].segname
+				: ((struct section *)section)[n].segname);
 		if (ft_strcmp(sectname, SECT_TEXT) == 0)
 			sect->section = 'T';
 		else if (ft_strcmp(sectname, SECT_DATA) == 0)
@@ -202,7 +205,11 @@ void	add_symtab_lst(int nsyms, int symoff, int stroff, char *ptr,
 				: (b_endian ? (uint64_t)swap_uint32(((struct nlist *)el)->n_value) : ((struct nlist *)el)->n_value), 
 				'?', el->n_sect, stringtable + el->n_un.n_strx, NULL};
 			if ((el->n_type & N_TYPE) == N_UNDF)
+			{
 				sym->type = (el->n_sect == NO_SECT) ? 'U' : 'C';
+				if (sym->value != 0)
+					sym->type = 'C';
+			}
 			else if ((el->n_type & N_TYPE) == N_ABS)
 				sym->type = 'A';
 			else if ((el->n_type & N_TYPE) == N_SECT)

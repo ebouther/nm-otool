@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/30 16:29:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/08 12:04:08 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/09 12:14:07 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void				handle_fat(char *f, char *ptr, uint8_t mask);
 /*
 **  ar.c
 */
-void				handle_ar(char *f, char *ptr);
+void				handle_ar(char *f, char *ptr, uint8_t mask);
 
 /*
 **  macho.c

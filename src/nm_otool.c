@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:24 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/08 12:03:49 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/09 12:14:46 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ uint8_t		handlers(char *f, char *ptr, uint8_t mask)
 	else if (magic_number == FAT_MAGIC || magic_number == FAT_CIGAM)
 		handle_fat(f, ptr, (magic_number == FAT_MAGIC) ? SET_LE(mask) : SET_BE(mask));
 	else if (magic_number == *((unsigned int *)ARMAG))
-		handle_ar(f, ptr);
+		handle_ar(f, ptr, mask);
 	else
 	{
 		disp_err(IS_NM(mask) ? "ft_nm" : "ft_otool", f, " The file was not recognized as a valid object file.\n");

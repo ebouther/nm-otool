@@ -55,7 +55,7 @@ OTOOL_OBJ = $(addprefix $(OBJ_DIR), $(OTOOL_OBJ_FILES))
 
 
 
-.PHONY: all clean fclean re $(LIBFT) 
+.PHONY: all clean fclean re $(LIBFT) norme
 
 all: $(OBJ_DIR) $(LIBFT) $(FT_NM) $(FT_OTOOL)
 
