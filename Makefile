@@ -21,6 +21,7 @@ SRC_FILES =	ar.c \
 			nm_otool.c \
 			symbols.c \
 			swap.c \
+			swap_int.c \
 			utils.c
 
 

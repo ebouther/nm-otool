@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/05 20:02:06 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/09 17:34:33 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/11 18:39:35 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ void	disp_err(char *bin, char *f, char *err)
 		ft_putstr_fd(f, 2);
 	ft_putstr_fd(err, 2);
 }
+
 void	hexdump(void *data, size_t size, uint64_t addr, uint8_t mask)
 {
 	size_t i;
