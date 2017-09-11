@@ -6,11 +6,9 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:32:57 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/05 20:00:37 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/11 17:30:34 by ebouther         ###   ########.fr       */
 /*                                                                            */
-/* ************************************************************************** */
-
-#include "swap.h"
+/* ************************************************************************** */ #include "swap.h"
 
 uint32_t	swap_uint32(uint32_t x)
 {
@@ -27,8 +25,7 @@ uint16_t	swap_uint16(uint16_t x)
 }
 
 uint64_t	swap_uint64(uint64_t x)
-{
-	return (((x & 0xff00000000000000ULL) >> 56) |
+{ return (((x & 0xff00000000000000ULL) >> 56) |
 			((x & 0x00ff000000000000ULL) >> 40) |
 			((x & 0x0000ff0000000000ULL) >> 24) |
 			((x & 0x000000ff00000000ULL) >> 8) |
@@ -73,3 +70,12 @@ void		swap_fat_arch(struct fat_arch *fat_archs,
 		i++;
 	}
 }
+
+void		swap_nlist(struct nlist_64 *el, uint8_t b_endian)
+{
+	el->n_un.n_strx =
+		b_endian ? swap_uint32(el->n_un.n_strx) : el->n_un.n_strx;
+	el->n_desc = b_endian ? swap_uint16(el->n_desc) : el->n_desc;
+
+}
+

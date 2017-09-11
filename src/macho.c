@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:37 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/09 15:37:04 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/11 16:47:28 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,14 +37,11 @@ void	nm_macho(char *f, char *ptr, uint8_t mask)
 	while (i < ncmds)
 	{
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT)
-			add_sect_lst(lc, sect_lst, IS_ARCH_64(mask), IS_BE(mask));
+			add_sect_lst(lc, sect_lst, mask);
 		else if (lc->cmd == LC_SYMTAB)
 		{
 			sym = (struct symtab_command *)lc;
-			add_symtab_lst(IS_BE(mask) ? swap_uint32(sym->nsyms) : sym->nsyms,
-				IS_BE(mask) ? swap_uint32(sym->symoff) : sym->symoff,
-				IS_BE(mask) ? swap_uint32(sym->stroff) : sym->stroff,
-				ptr, sym_lst, IS_ARCH_64(mask), IS_BE(mask));
+			add_symtab_lst(sym, ptr, sym_lst, mask);
 		}
 		swap_load_command(lc = (void *)lc + lc->cmdsize, IS_BE(mask));
 		i++;

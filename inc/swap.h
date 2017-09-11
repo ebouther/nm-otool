@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:36:00 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/05 20:28:20 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/11 17:32:23 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,5 +29,6 @@ void		swap_fat_arch(struct fat_arch *fat_archs,
 							uint32_t nfat_arch,
 							uint8_t l_endian);
 void		swap_load_command(struct load_command *lc, uint8_t l_endian);
+void		swap_nlist(struct nlist_64 *el, uint8_t b_endian);
 
 #endif
