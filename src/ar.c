@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:29 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/12 17:39:25 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/12 18:05:27 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,13 +49,13 @@ static void	get_macho(char *f, struct ar_hdr *ar_header, uint8_t mask)
 
 int8_t		is_valid_ar(struct ar_hdr *ar_header)
 {
-	if (!(ft_strcmp((char *)ar_header + sizeof(struct ar_hdr), SYMDEF) == 0
+	if (ft_strcmp((char *)ar_header + sizeof(struct ar_hdr), SYMDEF) == 0
 		|| ft_strcmp((char *)ar_header + sizeof(struct ar_hdr), SYMDEF_64) == 0
 		|| ft_strcmp((char *)ar_header + sizeof(struct ar_hdr), SYMDEF_SORTED)
 		== 0 || ft_strcmp((char *)ar_header + sizeof(struct ar_hdr),
-			SYMDEF_64_SORTED) == 0))
-		return (-1);
-	return (1);
+			SYMDEF_64_SORTED) == 0)
+		return (1);
+	return (-1);
 }
 
 void		handle_ar(char *f, char *ptr, uint8_t mask)
@@ -72,6 +72,7 @@ void		handle_ar(char *f, char *ptr, uint8_t mask)
 	while ((ar_header = (struct ar_hdr *)
 			((void*)ar_header + sizeof(struct ar_hdr)
 			+ ft_atoi(ar_header->ar_size)))
+			&& ft_strncmp((char *)ar_header, ARMAG, ft_strlen(ARMAG)) != 0
 			&& ((char *)ar_header)[0])
 	{
 		if (i == 0 && !IS_NM(mask))
