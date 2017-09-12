@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/30 16:29:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/12 15:17:12 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/12 18:33:00 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@
 # include <sys/mman.h>
 # include <sys/stat.h>
 
-#define SYMDEF_64		"__.SYMDEF_64"
-#define SYMDEF_64_SORTED	"__.SYMDEF_64 SORTED"
+# define SYMDEF_64		"__.SYMDEF_64"
+# define SYMDEF_64_SORTED	"__.SYMDEF_64 SORTED"
 
 /*
 **  nm_otool.c
@@ -51,5 +51,10 @@ void				handle_ar(char *f, char *ptr, uint8_t mask);
 **  macho.c
 */
 void				handle_macho(char *f, char *ptr, uint8_t mask);
+
+/*
+**  macho_otool.c
+*/
+void				otool_macho(char *f, char *ptr, uint8_t mask);
 
 #endif

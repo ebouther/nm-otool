@@ -2,8 +2,7 @@ FT_NM := ft_nm
 FT_OTOOL := ft_otool
 
 CC = gcc 
-CFLAGS = -Wall -Wextra -Werror 			-g
-
+CFLAGS = -Wall -Wextra -Werror
 LIBFT_PATH = ./libft/
 LIBFT = $(addprefix $(LIBFT_PATH),libft.a)
 
@@ -18,8 +17,11 @@ OBJ_DIR = ./obj/
 SRC_FILES =	ar.c \
 			fat.c \
 			macho.c \
+			macho_otool.c \
 			nm_otool.c \
+			sections.c \
 			symbols.c \
+			symbols2.c \
 			swap.c \
 			swap_int.c \
 			utils.c
