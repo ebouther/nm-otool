@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:29 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/11 18:38:48 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/12 17:39:25 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static void	get_macho_long_filename(char *f,
 
 	filename_pad = ft_atoi(ar_header->ar_name + ft_strlen(AR_EFMT1));
 	filename = ar_header->ar_name + sizeof(struct ar_hdr);
-	if (f && IS_DISP(mask))
+	if (f)
 		ft_printf("%s(%s):\n", f, filename);
 	handlers(NULL, (char *)ar_header
 			+ sizeof(struct ar_hdr) + filename_pad, mask);
@@ -42,7 +42,7 @@ static void	get_macho(char *f, struct ar_hdr *ar_header, uint8_t mask)
 		}
 		i++;
 	}
-	if (f && IS_DISP(mask))
+	if (f)
 		ft_printf("%s(%s):\n", f, filename);
 	handlers(NULL, (char *)ar_header + sizeof(struct ar_hdr), mask);
 }
