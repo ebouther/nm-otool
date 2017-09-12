@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/30 16:29:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/09 18:39:40 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/12 15:17:12 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@
 # include <ar.h>
 # include <sys/mman.h>
 # include <sys/stat.h>
+
+#define SYMDEF_64		"__.SYMDEF_64"
+#define SYMDEF_64_SORTED	"__.SYMDEF_64 SORTED"
 
 /*
 **  nm_otool.c

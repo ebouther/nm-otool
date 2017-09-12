@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/05 20:15:57 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/05 20:23:24 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/12 15:27:45 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,13 @@
 # define SET_BE(mask) (mask & ~(1 << ENDIANNESS_BIT))
 # define IS_LE(mask) ((mask & ENDIANNESS_MASK) != 0 ? 1 : 0)
 # define IS_BE(mask) (!IS_LE(mask))
-# define ARCH_64_BIT 2
+# define ARCH_BIT 2
 # define ARCH_64_MASK 0x04
 # define ARCH_32 0x00
 # define ARCH_64 0x01
 
-# define SET_ARCH_64(mask) (mask | (1 << ARCH_64_BIT))
-# define SET_ARCH_32(mask) (mask & ~(1 << ARCH_64_BIT))
+# define SET_ARCH_64(mask) (mask | (1 << ARCH_BIT))
+# define SET_ARCH_32(mask) (mask & ~(1 << ARCH_BIT))
 # define IS_ARCH_64(mask) ((mask & ARCH_64_MASK) != 0 ? 1 : 0)
 # define IS_ARCH_32(mask) (!IS_ARCH_64(mask))
 
