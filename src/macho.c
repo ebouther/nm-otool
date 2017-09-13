@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:37 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/13 18:09:02 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 19:25:42 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,9 @@ int		parse_lc(t_sym **sym_lst, t_sect **sect_lst, char *ptr, uint8_t mask)
 		if (lc->cmd == LC_SEGMENT_64 || lc->cmd == LC_SEGMENT)
 			add_sect_lst(lc, sect_lst, mask);
 		else if (lc->cmd == LC_SYMTAB)
-		{
 			if (add_symtab_lst((struct symtab_command *)lc,
 					ptr, sym_lst, mask) == -1)
 				return (EXIT_FAILURE);
-		}
 		swap_load_command(lc = (void *)lc + lc->cmdsize, IS_BE(mask));
 		i++;
 	}

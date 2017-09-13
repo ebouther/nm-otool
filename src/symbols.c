@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/09 14:24:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/13 18:47:14 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 19:27:37 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,8 @@ int		add_symtab_lst(struct symtab_command *symtab, char *ptr,
 {
 	t_add_sym	a;
 
-	a.i = 0;
-	a.stringtable = (void *)ptr +
-		(IS_BE(mask) ? swap_uint32(symtab->stroff) : symtab->stroff);
+	a = (t_add_sym){.i = 0, .stringtable = (void *)ptr +
+		(IS_BE(mask) ? swap_uint32(symtab->stroff) : symtab->stroff)};
 	a.sym = last_node_sym(*sym_lst);
 	a.nsyms = IS_BE(mask) ? swap_uint32(symtab->nsyms) : symtab->nsyms;
 	while (a.i < a.nsyms)
