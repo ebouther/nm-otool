@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/04 16:01:24 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/13 18:07:42 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 19:20:43 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ uint8_t		handlers(char *f, char *ptr, uint8_t mask)
 {
 	unsigned int	magic_number;
 
+	if ((unsigned long)ptr > g_offset)
+		return (EXIT_FAILURE);
 	magic_number = *(unsigned int *)ptr;
 	if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
 		return (handle_macho(f, ptr,
@@ -50,7 +52,7 @@ uint8_t		nm_otool(int fd, char *file, uint8_t mask)
 	if ((ptr = mmap(0, buf.st_size,
 			PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 		return (EXIT_FAILURE);
-	offset = buf.st_size;
+	g_offset = (unsigned long)ptr + buf.st_size - 1;
 	ret = handlers(file, ptr, mask);
 	if (munmap(ptr, buf.st_size) < 0)
 		return (EXIT_FAILURE);

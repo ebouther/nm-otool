@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/30 16:29:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/13 18:10:19 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 18:35:50 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,6 @@ int					handle_macho(char *f, char *ptr, uint8_t mask);
 */
 void				otool_macho(char *f, char *ptr, uint8_t mask);
 
-unsigned int		offset;
+unsigned long		g_offset;
 
 #endif

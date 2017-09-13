@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/05 20:02:06 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/12 18:28:28 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 18:45:03 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,4 +43,16 @@ void	hexdump(void *data, size_t size, uint64_t addr, uint8_t mask)
 		if ((i += 16) >= size)
 			break ;
 	}
+}
+
+size_t	strlen_secure(const char *s)
+{
+	size_t	i;
+
+	i = 0;
+	while ((unsigned long)s + i <= g_offset && s[i])
+		i++;
+	if ((unsigned long)s + i > g_offset)
+		return (0);
+	return (i);
 }

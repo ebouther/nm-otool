@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/09 14:24:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/13 18:11:26 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 18:47:14 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ int		add_symtab_lst(struct symtab_command *symtab, char *ptr,
 			+ (a.i * (IS_ARCH_64(mask) ? sizeof(struct nlist_64)
 				: sizeof(struct nlist))), IS_BE(mask)) == -1)
 			return (EXIT_FAILURE);
-		if (ft_strlen(a.stringtable + a.el->n_un.n_strx) > 0
+		if (strlen_secure(a.stringtable + a.el->n_un.n_strx) > 0
 			&& !(a.el->n_type & N_STAB))
 		{
 			alloc_sym(&a.sym, sym_lst);
