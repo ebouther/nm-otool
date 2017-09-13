@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/13 12:31:47 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/13 14:05:15 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 14:39:12 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@
 # define FLAG_R 3
 # define FLAG_J 4
 
-# define FLAG NO_FLAG 
+# define FLAG NO_FLAG
 
 # define F_OCT 1
 # define F_DEC 2
 
-# define FORMAT NO_FLAG 
+# define FORMAT NO_FLAG
 
 #endif
