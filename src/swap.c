@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/07 17:32:57 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/11 18:41:13 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 18:14:22 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,12 @@ void		swap_fat_arch(struct fat_arch *fat_archs,
 	}
 }
 
-void		swap_nlist(struct nlist_64 *el, uint8_t b_endian)
+int			swap_nlist(struct nlist_64 *el, uint8_t b_endian)
 {
+	if ((unsigned int)el > offset)
+		return (-1);
 	el->n_un.n_strx =
 		b_endian ? swap_uint32(el->n_un.n_strx) : el->n_un.n_strx;
 	el->n_desc = b_endian ? swap_uint16(el->n_desc) : el->n_desc;
+	return (0);
 }

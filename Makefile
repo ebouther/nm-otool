@@ -2,7 +2,7 @@ FT_NM := ft_nm
 FT_OTOOL := ft_otool
 
 CC = gcc 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 LIBFT_PATH = ./libft/
 LIBFT = $(addprefix $(LIBFT_PATH),libft.a)
 

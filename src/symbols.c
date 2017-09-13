@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/09 14:24:18 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/12 18:25:17 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 18:11:26 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void	set_sym(t_sym *sym, struct nlist_64 *el, uint8_t mask)
 		((struct nlist *)el)->n_value) : ((struct nlist *)el)->n_value;
 }
 
-void	add_symtab_lst(struct symtab_command *symtab, char *ptr,
+int		add_symtab_lst(struct symtab_command *symtab, char *ptr,
 						t_sym **sym_lst, uint8_t mask)
 {
 	t_add_sym	a;
@@ -84,10 +84,11 @@ void	add_symtab_lst(struct symtab_command *symtab, char *ptr,
 	a.nsyms = IS_BE(mask) ? swap_uint32(symtab->nsyms) : symtab->nsyms;
 	while (a.i < a.nsyms)
 	{
-		swap_nlist(a.el = (void *)ptr +
+		if (swap_nlist(a.el = (void *)ptr +
 			(IS_BE(mask) ? swap_uint32(symtab->symoff) : symtab->symoff)
-			+ (a.i * (IS_ARCH_64(mask) ?
-				sizeof(struct nlist_64) : sizeof(struct nlist))), IS_BE(mask));
+			+ (a.i * (IS_ARCH_64(mask) ? sizeof(struct nlist_64)
+				: sizeof(struct nlist))), IS_BE(mask)) == -1)
+			return (EXIT_FAILURE);
 		if (ft_strlen(a.stringtable + a.el->n_un.n_strx) > 0
 			&& !(a.el->n_type & N_STAB))
 		{
@@ -99,4 +100,5 @@ void	add_symtab_lst(struct symtab_command *symtab, char *ptr,
 		}
 		a.i++;
 	}
+	return (EXIT_SUCCESS);
 }

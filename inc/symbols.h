@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/09 14:25:14 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/13 14:00:01 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 17:56:05 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void				free_lists(t_sym **sym_lst, t_sect **sect_lst);
 void				disp_sym_lst(t_sym *lst, t_sect *sect_lst);
 void				sort_sym_lst(t_sym **lst);
 void				add_sect_lst(void *seg, t_sect **sect_lst, uint8_t mask);
-void				add_symtab_lst(struct symtab_command *symtab, char *ptr,
+int					add_symtab_lst(struct symtab_command *symtab, char *ptr,
 						t_sym **sym_lst, uint8_t mask);
 
 #endif
