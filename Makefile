@@ -33,6 +33,7 @@ INC_FILES = masks.h \
 			nm_otool.h \
 			symbols.h \
 			swap.h \
+			flags.h \
 			utils.h \
 			nm.h
 

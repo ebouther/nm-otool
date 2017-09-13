@@ -6,35 +6,11 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/12 18:25:10 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/12 18:25:30 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 14:04:29 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <symbols.h>
-
-void	free_lists(t_sym **sym_lst, t_sect **sect_lst)
-{
-	t_sym		*lst;
-	t_sect		*s_lst;
-	void		*tmp;
-
-	lst = *sym_lst;
-	while (lst)
-	{
-		tmp = lst;
-		lst = lst->next;
-		free(tmp);
-	}
-	s_lst = *sect_lst;
-	while (s_lst)
-	{
-		tmp = s_lst;
-		s_lst = s_lst->next;
-		free(tmp);
-	}
-	free(sym_lst);
-	free(sect_lst);
-}
 
 void	get_sym_sect(t_sect *sect_lst, t_sym *lst)
 {
@@ -55,6 +31,29 @@ void	get_sym_sect(t_sect *sect_lst, t_sym *lst)
 	}
 }
 
+void	disp_sym(t_sym *lst)
+{
+	if ((FLAG == FLAG_UPPER_U
+			&& lst->type == 'U')
+		|| (FLAG == FLAG_U
+			&& lst->type != 'U'))
+		return ;
+	if (lst->type != 'U')
+	{
+		if (FORMAT == NO_FLAG)
+			ft_printf(lst->arch_64 ? "%016lx " : "%08lx ", lst->value);
+		else if (FORMAT == F_DEC)
+			ft_printf(lst->arch_64 ? "%016ld " : "%08ld ", lst->value);
+		else if (FORMAT == F_OCT)
+			ft_printf(lst->arch_64 ? "%016lo " : "%08lo ", lst->value);
+	}
+	else if (FLAG != FLAG_U)
+		ft_printf(lst->arch_64 ? "                 " : "         ");
+	if (FLAG != FLAG_U)
+		ft_printf("%c ", lst->type);
+	ft_printf("%s\n", lst->name);
+}
+
 void	disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 {
 	t_sect	*begin;
@@ -64,16 +63,12 @@ void	disp_sym_lst(t_sym *lst, t_sect *sect_lst)
 	{
 		sect_lst = begin;
 		if (lst->n_sect && sect_lst && (lst->type == 'T' || lst->type == 't')
-			&& lst->n_sect != NO_SECT)
-		{
+				&& lst->n_sect != NO_SECT)
 			get_sym_sect(sect_lst, lst);
-		}
-		if (lst->type != 'U')
-			ft_printf(lst->arch_64 ? "%016lx " : "%08lx ", lst->value);
+		if (FLAG == FLAG_J)
+			ft_printf("%s\n", lst->name);
 		else
-			ft_printf(lst->arch_64 ? "                 " : "         ");
-		ft_printf("%c ", lst->type);
-		ft_printf("%s\n", lst->name);
+			disp_sym(lst);
 		lst = lst->next;
 	}
 }
@@ -100,16 +95,18 @@ void	sort_sym_lst(t_sym **lst)
 	int		diff;
 
 	sorted = 0;
-	if (!lst)
-		return ;
-	while (!sorted)
+	while (lst && !sorted)
 	{
 		sorted = 1;
 		sym = *lst;
 		while (sym && sym->next)
 		{
-			if ((diff = ft_strcmp(sym->name, sym->next->name)) > 0
-				|| (diff == 0 && sym->value > sym->next->value))
+			if ((FLAG != FLAG_R
+				&& ((diff = ft_strcmp(sym->name, sym->next->name)) > 0
+					|| (diff == 0 && sym->value > sym->next->value))) ||
+				(FLAG == FLAG_R
+				&& ((diff = ft_strcmp(sym->next->name, sym->name)) > 0
+					|| (diff == 0 && sym->next->value > sym->value))))
 			{
 				swap_sym_node(sym);
 				sorted = 0;

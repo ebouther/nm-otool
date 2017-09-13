@@ -6,11 +6,35 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/12 18:25:35 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/12 18:25:49 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 14:04:42 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <symbols.h>
+
+void	free_lists(t_sym **sym_lst, t_sect **sect_lst)
+{
+	t_sym		*lst;
+	t_sect		*s_lst;
+	void		*tmp;
+
+	lst = *sym_lst;
+	while (lst)
+	{
+		tmp = lst;
+		lst = lst->next;
+		free(tmp);
+	}
+	s_lst = *sect_lst;
+	while (s_lst)
+	{
+		tmp = s_lst;
+		s_lst = s_lst->next;
+		free(tmp);
+	}
+	free(sym_lst);
+	free(sect_lst);
+}
 
 t_sect	*last_node_sect(t_sect *sect)
 {

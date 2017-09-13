@@ -6,7 +6,7 @@
 /*   By: ebouther <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/09 14:25:14 by ebouther          #+#    #+#             */
-/*   Updated: 2017/09/12 18:33:50 by ebouther         ###   ########.fr       */
+/*   Updated: 2017/09/13 14:00:01 by ebouther         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 # include "swap.h"
 # include "masks.h"
+# include "flags.h"
 
 # include <mach-o/loader.h>
 # include <mach-o/nlist.h>
